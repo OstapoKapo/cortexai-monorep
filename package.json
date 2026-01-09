@@ -10,9 +10,13 @@
   "scripts": {
     "build": "npm run build --workspaces",
     "lint": "npm run lint --workspaces",
-    "check": "npm run lint --workspaces && npm run build --workspaces"
+    "check": "npm run lint --workspaces && npm run build --workspaces",
+    "prepare": "husky install"
   },
   "dependencies": {
     "zod": "^4.3.5"
+  },
+  "devDependencies": {
+    "husky": "^8.0.0"
   }
 }

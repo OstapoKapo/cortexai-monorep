@@ -8,9 +8,9 @@
     "shared"
   ],
   "scripts": {
-    "build": "npm run build --workspaces",
-    "lint": "npm run lint --workspaces",
-    "check": "npm run lint --workspaces && npm run build --workspaces",
+    "build": "npm run build --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "check": "npm run lint --workspaces --if-present && npm run build --workspaces --if-present",
     "prepare": "husky install"
   },
   "dependencies": {

@@ -1,0 +1,58 @@
+
+services:
+  # --- 1. Backend (твій NestJS) ---
+  backend:
+    build:
+      context: ./back # Вказуємо шлях до папки 'back'
+      # dockerfile: Dockerfile (можна не вказувати, якщо він так і називається)
+    container_name: cortexai-backend
+    ports:
+      - "8000:8000" # Порт для NestJS
+    depends_on:
+      - db
+      - redis
+    env_file:
+      - ./back/.env.docker # Шлях до .env файлу тепер відносно кореня
+    environment:
+      # Назви 'db' та 'redis' працюватимуть, бо вони в одній мережі
+      DATABASE_URL: postgres://postgres:admin@db:5432/cortexai
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    restart: always
+
+  # --- 2. Frontend (твій React/Next) ---
+  frontend:
+    build:
+      context: ./front # Вказуємо шлях до папки 'front'
+    container_name: cortexai-frontend
+    ports:
+      - "3000:3000" # Порт для React/Next
+    restart: always
+    # Можна додати, якщо фронту потрібен бек під час збірки (зазвичай ні)
+    # depends_on:
+    #   - backend 
+
+  # --- 3. База даних ---
+  db:
+    image: postgres:13
+    container_name: cortexai-db # Унікальне ім'я
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: cortexai # Назва БД для проекту
+    volumes:
+      - pgdata-cortexai:/var/lib/postgresql/data # Унікальний том
+
+  # --- 4. Редіс ---
+  redis:
+    image: redis:7
+    container_name: cortexai-redis # Унікальне ім'я
+    ports:
+      - "6379:6379"
+    restart: always
+
+# Оголошуємо унікальний том для даних БД
+volumes:
+  pgdata-cortexai:

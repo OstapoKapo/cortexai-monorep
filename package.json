@@ -1,0 +1,18 @@
+{
+  "name": "cortexai",
+  "version": "0.0.0",
+  "private": true,
+  "workspaces": [
+    "client",
+    "back",
+    "shared"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "lint": "npm run lint --workspaces",
+    "check": "npm run lint --workspaces && npm run build --workspaces"
+  },
+  "dependencies": {
+    "zod": "^4.3.5"
+  }
+}

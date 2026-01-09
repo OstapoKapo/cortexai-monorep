@@ -1,8 +1,11 @@
 {
-  "name": "@cortex/shared", 
+  "name": "@cortex/shared",
   "version": "1.0.0",
   "main": "index.ts",
   "dependencies": {
-    "zod": "^3.22.4" 
+    "zod": "^3.22.4"
+  },
+  "optionalDependencies": {
+    "@tailwindcss/oxide-linux-x64-gnu": "^4.1.18"
   }
 }

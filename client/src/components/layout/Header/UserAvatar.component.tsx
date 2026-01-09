@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 interface UserAvatarProps {
   name: string;
   imageUrl?: string;
@@ -10,9 +12,11 @@ export function UserAvatar({ name, imageUrl }: UserAvatarProps) {
 
   if (imageUrl) {
     return (
-      <img
+      <Image
         src={imageUrl}
         alt={name}
+        width={36}
+        height={36}
         className="w-9 h-9 rounded-full object-cover"
       />
     );

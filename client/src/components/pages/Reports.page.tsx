@@ -23,6 +23,9 @@ interface ReportCardProps {
 }
 
 function ReportCard({ index }: ReportCardProps) {
+  // Детерміноване значення прогресу на основі індексу
+  const progress = ((index * 17) % 60) + 40;
+  
   return (
     <div className="bg-card border border-border rounded-xl p-6 hover:border-primary/50 transition-colors cursor-pointer">
       <div className="flex items-center gap-3 mb-4">
@@ -37,7 +40,7 @@ function ReportCard({ index }: ReportCardProps) {
       <div className="h-2 bg-muted rounded-full overflow-hidden">
         <div
           className="h-full bg-primary rounded-full"
-          style={{ width: `${Math.random() * 60 + 40}%` }}
+          style={{ width: `${progress}%` }}
         />
       </div>
     </div>

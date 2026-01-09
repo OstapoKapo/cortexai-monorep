@@ -1,4 +1,4 @@
-import { FormField } from "@/components/custom/customForm.component";
+import { FormField } from "@/components/custom/СustomForm.component";
 import { Mail, Lock, User } from "lucide-react";
 
 export type RegisterFormData = {

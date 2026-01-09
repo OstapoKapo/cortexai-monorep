@@ -5,8 +5,8 @@ import Link from "next/link";
 import { ReactNode } from "react";
 import { LucideIcon } from "lucide-react";
 import { SubmitHandler, FieldValues, Path, UseFormReturn } from "react-hook-form";
-import { CustomInput } from "./customInput.component";
-import { CustomButton } from "./customButton.component";
+import { CustomInput } from "./СustomInput.component";
+import { CustomButton } from "./СustomButton.component";
 
 export interface FormField<T extends FieldValues> {
   id: Path<T>;

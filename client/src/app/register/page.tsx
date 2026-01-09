@@ -2,7 +2,7 @@
 "use no memo"
 import Link from "next/link";
 import { ArrowRight, Github } from "lucide-react";
-import CustomForm from "@/components/custom/customForm.component";
+import CustomForm from "@/components/custom/СustomForm.component";
 import registerFields, { RegisterFormData } from "@/configs/register.config";
 import { useForm } from "react-hook-form";
 import { registerSchema } from "@cortex/shared";

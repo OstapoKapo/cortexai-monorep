@@ -1,0 +1,145 @@
+@import "tailwindcss";
+
+/* --- 1. СВІТЛА ТЕМА (DEFAULT) --- */
+:root {
+  /* Основний фон і текст */
+  --background: #ffffff;
+  --foreground: #09090b;
+
+  /* Картки (форми логіну, модалки) */
+  --card: #ffffff;
+  --card-foreground: #09090b;
+
+  /* Popover (менюшки, тултіпи) */
+  --popover: #ffffff;
+  --popover-foreground: #09090b;
+
+  /* Primary (Головні кнопки "Увійти", "Зберегти") */
+  --primary: #18181b;         /* Майже чорний */
+  --primary-foreground: #fafafa; /* Білий текст на кнопці */
+  --primary-hover: #18181b/90;   /* Трохи прозоріший при наведенні */
+
+  /* Secondary (Другорядні кнопки "Скасувати") */
+  --secondary: #f4f4f5;
+  --secondary-foreground: #18181b;
+
+  /* Muted (Підказки, "Забули пароль?", неактивний текст) */
+  --muted: #f4f4f5;
+  --muted-foreground: #71717a;
+
+  /* Accent (Ховери в списках, дропдаунах) */
+  --accent: #f4f4f5;
+  --accent-foreground: #18181b;
+
+  /* Destructive (Кнопки "Видалити", помилки) */
+  --destructive: #ef4444;
+  --destructive-foreground: #fafafa;
+
+  /* Елементи форм (Інпути, бордери) */
+  --border: #e4e4e7;
+  --input: #e4e4e7;
+  --ring: #18181b; /* Колір обводки при фокусі */
+}
+
+/* --- 2. ТЕМНА ТЕМА --- */
+.dark {
+  --background: #09090b;
+  --foreground: #fafafa;
+
+  --card: #09090b;
+  --card-foreground: #fafafa;
+
+  --popover: #09090b;
+  --popover-foreground: #fafafa;
+
+  --primary: #fafafa;          /* Біла кнопка */
+  --primary-foreground: #18181b; /* Чорний текст */
+  --primary-hover: #fafafa/90;
+
+  --secondary: #27272a;
+  --secondary-foreground: #fafafa;
+
+  --muted: #27272a;
+  --muted-foreground: #a1a1aa;
+
+  --accent: #27272a;
+  --accent-foreground: #fafafa;
+
+  --destructive: #7f1d1d;
+  --destructive-foreground: #fafafa;
+
+  --border: #27272a;
+  --input: #27272a;
+  --ring: #d4d4d8;
+}
+
+/* --- 3. ФІОЛЕТОВА ТЕМА (PURPLE) --- */
+.purple {
+  --background: #180d26; /* Глибокий фіолетовий */
+  --foreground: #e9d5ff; /* Світло-лавандовий текст */
+
+  --card: #24123b;       /* Трохи світліший фон для карток */
+  --card-foreground: #e9d5ff;
+
+  --popover: #24123b;
+  --popover-foreground: #e9d5ff;
+
+  --primary: #9333ea;    /* Яскравий фіолетовий неон */
+  --primary-foreground: #ffffff;
+  --primary-hover: #a855f7; /* Світліший при наведенні */
+
+  --secondary: #3b0764;  /* Темно-фіолетова кнопка */
+  --secondary-foreground: #e9d5ff;
+
+  --muted: #2e1065;
+  --muted-foreground: #a78bfa;
+
+  --accent: #4c1d95;
+  --accent-foreground: #ffffff;
+
+  --destructive: #be123c;
+  --destructive-foreground: #ffffff;
+
+  --border: #4c1d95;     /* Фіолетові рамки інпутів */
+  --input: #2e1065;
+  --ring: #d8b4fe;
+}
+
+/* --- ПІДКЛЮЧЕННЯ ДО TAILWIND V4 --- */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-hover: var(--primary-hover);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
+
+/* Базові стилі */
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}

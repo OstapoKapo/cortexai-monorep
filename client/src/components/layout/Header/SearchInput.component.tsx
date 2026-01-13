@@ -1,7 +1,7 @@
 "use client";
 
 import { Search } from "lucide-react";
-import { CustomInput } from "@/components/custom/СustomInput.component";
+import { CustomInput } from "@/components/custom/CustomInput.component";
 
 interface SearchInputProps {
   placeholder?: string;

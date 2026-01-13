@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { ArrowRight, Github } from "lucide-react";
-import CustomForm from "@/components/custom/СustomForm.component";
+import { CustomForm } from "@/components/custom";
 import loginFields, { LoginFormData } from "@/configs/login.config";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";

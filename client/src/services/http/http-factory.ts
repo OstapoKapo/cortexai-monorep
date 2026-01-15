@@ -1,5 +1,5 @@
 import { mainAxios } from './axios-setup';
-import { IHttpClient, IHttpConfig, IResponse, IMap } from './types';
+import { IHttpClient, IHttpConfig, IResponse, IMap } from '../types';
 
 export class HttpService implements IHttpClient {
     constructor(

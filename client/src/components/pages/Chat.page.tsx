@@ -1,8 +1,8 @@
 "use client";
 
 import { Brain } from "lucide-react";
-import { CustomButton } from "@/components/custom/СustomButton.component";
-import { CustomInput } from "@/components/custom/СustomInput.component";
+import { CustomButton } from "@/components/custom/CustomButton.component";
+import { CustomInput } from "@/components/custom/CustomInput.component";
 
 export function ChatPage() {
   return (

@@ -2,7 +2,7 @@
 "use no memo"
 import Link from "next/link";
 import { ArrowRight, Github } from "lucide-react";
-import CustomForm from "@/components/custom/СustomForm.component";
+import {CustomForm} from "@/components/custom/CustomForm.component";
 import registerFields, { RegisterFormData } from "@/configs/register.config";
 import { useForm } from "react-hook-form";
 import { registerSchema } from "@cortex/shared";
@@ -23,7 +23,7 @@ export default function RegisterPage() {
     <div className="relative flex min-h-screen items-center justify-center bg-background p-4 overflow-hidden">
       
       {/* Decorative glow effect */}
-      <div className="absolute -z-10 h-[500px] w-[500px] rounded-full bg-primary/20 blur-[100px] opacity-50 pointer-events-none" />
+      <div className="absolute -z-10 h-125 w-125 rounded-full bg-primary/20 blur-[100px] opacity-50 pointer-events-none" />
 
       {/* Main card */}
       <div className="w-full max-w-md space-y-8 rounded-2xl border border-border bg-card p-8 shadow-2xl sm:p-10">

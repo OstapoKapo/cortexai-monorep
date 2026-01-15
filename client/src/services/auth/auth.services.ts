@@ -1,5 +1,4 @@
 import { httpFactory } from "../http/http-factory";
-import { IResponse } from "../types";
 import {LoginDtoType, RegisterDtoType} from "@cortex/shared"
 
 

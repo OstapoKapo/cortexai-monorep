@@ -1,22 +1,18 @@
 name: Monorepo CI
 
 on:
-  pull_request:
-    branches: ["main", "dev"]
   push:
+    branches: ["main", "dev"]
+  pull_request:
     branches: ["main", "dev"]
 
 jobs:
-  # ==============================
-  # 🎨 FRONTEND JOB (Next.js)
-  # ==============================
-  frontend-check:
-    name: Frontend (Lint & Build)
+  # ==================================================
+  # 🎨 CLIENT JOB (Next.js)
+  # ==================================================
+  client-check:
+    name: Client (Lint & Build)
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./client 
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -26,28 +22,26 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          # 👇 Важливо: вказуємо шлях до лок-файлу фронта для кешування
-          cache-dependency-path: ./client/package-lock.json
+          # 👇 ВАЖЛИВО: Вказуємо на головний лок-файл у корені
+          cache-dependency-path: ./package-lock.json
 
       - name: Install Dependencies
+        # 👇 Встановлюємо залежності для ВСІХ проектів зразу (з кореня)
         run: npm ci
 
-      - name: Run ESLint
-        run: npm run lint
+      - name: Lint Client
+        # 👇 -w client означає: "Запусти npm run lint всередині папки client"
+        run: npm run lint -w client
 
-      - name: Build Frontend
-        run: npm run build
+      - name: Build Client
+        run: npm run build -w client
 
-  # ==============================
+  # ==================================================
   # ⚙️ BACKEND JOB (NestJS)
-  # ==============================
+  # ==================================================
   backend-check:
     name: Backend (Lint & Build)
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./back  # 👈 Вказуємо папку бека
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -57,15 +51,13 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          # 👇 Вказуємо шлях до лок-файлу бека
-          cache-dependency-path: ./back/package-lock.json
+          cache-dependency-path: ./package-lock.json
 
       - name: Install Dependencies
         run: npm ci
 
-      - name: Run ESLint
-        run: npm run lint
+      - name: Lint Backend
+        run: npm run lint -w back
 
-      # Для NestJS білд теж важливий, щоб перевірити чи немає помилок компіляції TS
       - name: Build Backend
-        run: npm run build
+        run: npm run build -w back

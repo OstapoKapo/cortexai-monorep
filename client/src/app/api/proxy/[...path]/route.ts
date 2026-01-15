@@ -3,8 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 
 const NEST_API_URL = process.env.NEST_INTERNAL_URL || 'http://localhost:3001';
 
-async function proxyHandler(req: NextRequest, { params } : {params: {path: string[]}}) {
-    const path = params.path.join('/');
+async function proxyHandler(req: NextRequest, { params } : {params: Promise<{path: string[]}>}) {
+    const path = (await params).path.join('/');
     const searchParams = req.nextUrl.searchParams.toString();
     const targetUrl =  `${NEST_API_URL}/${path}${searchParams ? `?${searchParams}` : ''}`;
 

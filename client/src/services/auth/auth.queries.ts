@@ -20,7 +20,7 @@ export const useLoginMutation = () => {
 export const useLogoutMutation = () => {
     const router = useRouter();
 
-    return useMutation<ILogoutResponse, unknown, {}>({
+    return useMutation<ILogoutResponse, unknown, void>({
         mutationFn: () => authService.logout(),
         onSuccess: async () => {
             toast.success("Logout successful!");

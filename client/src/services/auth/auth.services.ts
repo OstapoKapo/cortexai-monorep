@@ -34,7 +34,7 @@ class AuthService {
     }
 
     async logout(): Promise<ILogoutResponse> {
-        return this.http.post<ILogoutResponse, {}>(`${NEST_INTERNAL_URL}/auth/logout`, {});
+        return this.http.post<ILogoutResponse, null>(`${NEST_INTERNAL_URL}/auth/logout`, null);
     }
 
     async register(data: RegisterDtoType) : Promise<IAuthResponse> {

@@ -1,11 +1,16 @@
-import { Module } from '@nestjs/common';
-import { AuthService } from './modules/auth/services/auth.service';
-import { AuthController } from './modules/auth/auth.controller';
+import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { AuthModule } from './modules/auth/auth.module';
+import { CorrelationIDMiddleware } from '@backend-common';
 
 @Module({
   imports: [AuthModule],
-  controllers: [AuthController],
-  providers: [AuthService],
+  controllers: [],
+  providers: [],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(CorrelationIDMiddleware)
+      .forRoutes({ path: '*', method: RequestMethod.ALL });
+  }
+}

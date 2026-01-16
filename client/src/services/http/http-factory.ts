@@ -117,12 +117,20 @@ export class HttpFactoryService {
         return undefined;
     }
 
+    public getDirectUrl(): string | undefined {
+        return process.env.NEXT_PUBLIC_NEST_INTERNAL_URL || "http://localhost:4000/api";
+    }
+
     public createHttpService(): HttpService {
         return new HttpService(mainAxios, this.getBaseUrl());
     }
 
     public createAuthHttpService(): EnhancedWithAuthHttpService {
         return new EnhancedWithAuthHttpService(new HttpService(mainAxios, this.getBaseUrl()));
+    }
+
+    public createDirectHttpService(): HttpService {
+        return new HttpService(mainAxios, this.getDirectUrl());
     }
 }
 

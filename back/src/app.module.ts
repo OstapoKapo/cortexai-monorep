@@ -11,6 +11,6 @@ export class AppModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(CorrelationIDMiddleware)
-      .forRoutes({path: '*', method: RequestMethod.ALL});
+      .forRoutes({ path: '*', method: RequestMethod.ALL });
   }
 }

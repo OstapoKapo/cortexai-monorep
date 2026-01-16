@@ -1,47 +1,26 @@
 import { httpFactory } from "../http/http-factory";
-import {LoginDtoType, RegisterDtoType} from "@cortex/shared"
+import {LoginDtoType, RegisterDtoType, ILoginResponse, IRegisterResponse, IUserProfileResponse, ILogoutResponse} from "@cortex/shared"
+import { API_ROUTES } from "@cortex/shared";
 
-
-export interface IAuthResponse {
-    message: string;
-    data: {
-        accessToken: string;
-    }
-}
-
-export interface ILogoutResponse {
-    message: string;
-}
-
-export interface IUserProfileResponse {
-    message: string;
-    data: {
-        id: string;
-        email: string;
-        name: string;
-    }
-}
-
-const NEST_INTERNAL_URL = process.env.NEXT_PUBLIC_NEST_INTERNAL_URL || 'http://localhost:4000/api/proxy';
 
 class AuthService {
-    private http = httpFactory.createHttpService();
     private authHttp = httpFactory.createAuthHttpService();
+    private directHttp = httpFactory.createDirectHttpService();
     
-    async login(data: LoginDtoType) : Promise<IAuthResponse> {
-        return this.http.post<IAuthResponse, LoginDtoType>(`${NEST_INTERNAL_URL}/auth/login`, data);
+    async login(data: LoginDtoType) : Promise<ILoginResponse> {
+        return this.directHttp.post<ILoginResponse, LoginDtoType>(`${API_ROUTES.AUTH.LOGIN}`, data);
     }
 
     async logout(): Promise<ILogoutResponse> {
-        return this.http.post<ILogoutResponse, null>(`${NEST_INTERNAL_URL}/auth/logout`, null);
+        return this.authHttp.post<ILogoutResponse, null>(`${API_ROUTES.AUTH.LOGOUT}`, null);
     }
 
-    async register(data: RegisterDtoType) : Promise<IAuthResponse> {
-        return this.http.post<IAuthResponse, RegisterDtoType>(`${NEST_INTERNAL_URL}/auth/register`, data);
+    async register(data: RegisterDtoType) : Promise<IRegisterResponse> {
+        return this.directHttp.post<IRegisterResponse, RegisterDtoType>(`${API_ROUTES.AUTH.REGISTER}`, data);
     }
 
     async getProfile(): Promise<IUserProfileResponse> {
-        return this.authHttp.get<IUserProfileResponse>('/auth/profile');
+        return this.authHttp.get<IUserProfileResponse>(`${API_ROUTES.USERS.ME}`);
     }
 }
 

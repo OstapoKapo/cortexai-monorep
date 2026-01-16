@@ -6,7 +6,8 @@
   "workspaces": [
     "client",
     "back",
-    "shared"
+    "shared",
+    "backend-common"
   ],
   "scripts": {
     "dev": "turbo dev",

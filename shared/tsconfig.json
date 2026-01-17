@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "ES2022",
+    "declaration": true,           // Генерує .d.ts файли (типи)
+    "declarationMap": true,        // Допомагає IDE переходити до коду
+    "sourceMap": true,             // Для дебагу
+    "outDir": "./dist",            // Куди класти результат
+    "rootDir": ".",                // Де шукати вхідні файли
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true
+  },
+  "include": ["index.ts", "src/**/*"], // Включи свій index.ts та папку src, якщо вона є
+  "exclude": ["node_modules", "dist"]
+}

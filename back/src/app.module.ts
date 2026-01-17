@@ -1,6 +1,6 @@
 import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { AuthModule } from './modules/auth/auth.module';
-import { CorrelationIDMiddleware } from '@backend-common';
+import { CorrelationIDMiddleware } from '@cortex/backend-common';
 
 @Module({
   imports: [AuthModule],

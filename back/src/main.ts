@@ -5,7 +5,10 @@ import * as dotenv from 'dotenv';
 import { ValidationPipe } from '@nestjs/common/pipes/validation.pipe';
 import { Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { HttpExceptionFilter, TransformInterceptor } from '@backend-common';
+import {
+  HttpExceptionFilter,
+  TransformInterceptor,
+} from '@cortex/backend-common';
 import { RemoveUserIdInterceptor } from './common/interceptors';
 import * as cookieParser from 'cookie-parser';
 dotenv.config();

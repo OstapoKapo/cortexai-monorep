@@ -1,11 +1,11 @@
 import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { AuthModule } from './modules/auth/auth.module';
 import { CorrelationIDMiddleware } from '@cortex/backend-common';
+import { UsersModule } from './modules/users/users.module';
+import { PrismaModule } from './modules/prisma/prisma.module';
 
 @Module({
-  imports: [AuthModule],
-  controllers: [],
-  providers: [],
+  imports: [AuthModule, UsersModule, PrismaModule],
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {

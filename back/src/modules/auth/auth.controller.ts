@@ -3,9 +3,12 @@ import { Body, Controller, UsePipes } from '@nestjs/common';
 import { Post } from '@nestjs/common';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ZodValidationPipe } from 'nestjs-zod';
+import { AuthService } from './auth.service';
 
 @Controller('auth')
 export class AuthController {
+  constructor(private readonly authService: AuthService) {}
+
   @ApiOperation({ summary: 'Register a new user' })
   @ApiResponse({ status: 201, description: 'User registered successfully.' })
   @ApiResponse({ status: 400, description: 'Bad Request.' })

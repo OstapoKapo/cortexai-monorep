@@ -1,11 +1,17 @@
 import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { AuthModule } from './modules/auth/auth.module';
-import { CorrelationIDMiddleware } from '@backend-common';
+import { CorrelationIDMiddleware } from '@cortex/backend-common';
+import { UsersModule } from './modules/users/users.module';
+import { PrismaModule } from './modules/prisma/prisma.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [AuthModule],
-  controllers: [],
-  providers: [],
+  imports: [
+    AuthModule,
+    UsersModule,
+    PrismaModule,
+    ConfigModule.forRoot({ isGlobal: true, envFilePath: `.env` }),
+  ],
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {

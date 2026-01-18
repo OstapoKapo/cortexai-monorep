@@ -30,10 +30,8 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ZodValidationPipe());
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-call
   app.useGlobalFilters(new HttpExceptionFilter());
-  
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-call
+
   app.useGlobalInterceptors(new TransformInterceptor(app.get(Reflector)));
   app.useGlobalInterceptors(new RemoveUserIdInterceptor());
 

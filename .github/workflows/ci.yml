@@ -65,6 +65,9 @@ jobs:
       # Назва воркспейсу має співпадати з name у package.json shared-папки
       - name: Build Shared Library
         run: npm run build -w @cortex/shared
+      
+      - name: Build Backend Common
+        run: npm run build -w @cortex/backend-common
 
       - name: Lint Backend
         run: npm run lint -w back

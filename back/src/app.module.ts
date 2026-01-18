@@ -15,7 +15,6 @@ import { ConfigModule } from '@nestjs/config';
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     consumer
       .apply(CorrelationIDMiddleware)
       .forRoutes({ path: '*', method: RequestMethod.ALL });

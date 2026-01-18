@@ -2,6 +2,7 @@ import {
   ConflictException,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { UsersRepository } from './users.repository';
 import { Prisma, User } from '@prisma/client';
@@ -15,6 +16,25 @@ export class UsersService {
     try {
       return await this.usersRepository.findAll();
     } catch {
+      throw new InternalServerErrorException(AppErrors.SYSTEM.INTERNAL_ERROR);
+    }
+  }
+
+  async changeUserData(
+    id: string,
+    data: Prisma.UserUpdateInput,
+  ): Promise<User> {
+    if (data.password) {
+      delete data.password;
+    }
+    try {
+      return await this.usersRepository.update(data, id);
+    } catch (err) {
+      if (err instanceof Prisma.PrismaClientKnownRequestError) {
+        if (err.code === 'P2025') {
+          throw new NotFoundException(AppErrors.AUTH.USER_NOT_FOUND);
+        }
+      }
       throw new InternalServerErrorException(AppErrors.SYSTEM.INTERNAL_ERROR);
     }
   }
@@ -54,7 +74,7 @@ export class UsersService {
     } catch (err) {
       if (err instanceof Prisma.PrismaClientKnownRequestError) {
         if (err.code === 'P2025') {
-          throw new ConflictException(AppErrors.AUTH.USER_NOT_FOUND);
+          throw new NotFoundException(AppErrors.AUTH.USER_NOT_FOUND);
         }
       }
       throw new InternalServerErrorException(AppErrors.SYSTEM.INTERNAL_ERROR);

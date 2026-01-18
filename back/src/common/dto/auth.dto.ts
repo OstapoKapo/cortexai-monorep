@@ -1,8 +1,8 @@
-import { createZodDto } from 'nestjs-zod';
+import { createZodDto, ZodDto } from 'nestjs-zod';
 import { loginSchema, registerSchema } from '@cortex/shared';
 
-const BaseRegisterDto = createZodDto(registerSchema);
-export class RegisterDto extends (BaseRegisterDto as new () => any) {}
+const RegisterZodDto: ZodDto<typeof registerSchema> = createZodDto(registerSchema);
+export class RegisterDto extends RegisterZodDto {}
 
-const BaseLoginDto = createZodDto(loginSchema);
-export class LoginDto extends (BaseLoginDto as new () => any) {}
+const LoginZodDto: ZodDto<typeof loginSchema> = createZodDto(loginSchema);
+export class LoginDto extends LoginZodDto {}

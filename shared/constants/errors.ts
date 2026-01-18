@@ -8,7 +8,6 @@ export const AppErrors = {
     UNAUTHORIZED: 'Unauthorized access',
     TOKEN_EXPIRED: 'Token has expired',
   },
-
   VALIDATION: {
     INVALID_EMAIL: 'Email is invalid',
     PASSWORD_TOO_SHORT: 'Password must be at least 6 characters',

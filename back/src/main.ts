@@ -2,12 +2,15 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import helmet from 'helmet';
 import * as dotenv from 'dotenv';
-import { ValidationPipe } from '@nestjs/common/pipes/validation.pipe';
 import { Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { HttpExceptionFilter, TransformInterceptor } from '@backend-common';
+import {
+  HttpExceptionFilter,
+  TransformInterceptor,
+} from '@cortex/backend-common';
 import { RemoveUserIdInterceptor } from './common/interceptors';
 import * as cookieParser from 'cookie-parser';
+import { ZodValidationPipe } from 'nestjs-zod';
 dotenv.config();
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -25,9 +28,10 @@ async function bootstrap() {
     ],
   });
 
-  app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
+  app.useGlobalPipes(new ZodValidationPipe());
 
   app.useGlobalFilters(new HttpExceptionFilter());
+
   app.useGlobalInterceptors(new TransformInterceptor(app.get(Reflector)));
   app.useGlobalInterceptors(new RemoveUserIdInterceptor());
 
@@ -45,4 +49,4 @@ async function bootstrap() {
 
   await app.listen(process.env.PORT ?? 8000);
 }
-bootstrap();
+void bootstrap();

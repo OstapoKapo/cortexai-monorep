@@ -16,11 +16,16 @@ mainAxios.interceptors.response.use(
     (error: AxiosError<ApiErrorResponse>) => {
         if (error.response) {
             console.error('[API Error]:', error.response.status, error.response.data);
-            
-            if(typeof window !== 'undefined') toast.error(error.response.data.message || 'An error occurred');
+            if(typeof window !== 'undefined') {
+                toast.dismiss()
+                toast.error(error.response.data.message || 'An error occurred');
+            }
         } else {
             console.error('[Network Error]:', error.message);
-            if(typeof window !== 'undefined') toast.error('Network error occurred. Please try again later.');
+            if(typeof window !== 'undefined'){
+                toast.dismiss()
+                toast.error('Network error occurred. Please try again later.');
+            }
         }
 
         return Promise.reject(error);

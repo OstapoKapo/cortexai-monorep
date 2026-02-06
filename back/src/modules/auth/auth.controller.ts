@@ -31,6 +31,7 @@ export class AuthController {
     @Body() dto: RegisterDto,
     @Res({ passthrough: true }) res: Response,
   ): Promise<{ message?: string }> {
+    console.log('Register DTO:', dto);
     const result = await this.authService.register(dto);
     this.createCookie(res, result.accessToken, result.refreshToken);
     return { message: 'User registered successfully' };

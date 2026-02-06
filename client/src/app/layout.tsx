@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import {Montserrat } from "next/font/google";
 import "./globals.css";
+import { Toaster } from "react-hot-toast";
 import { ThemeProvider } from "@/components/provider/ThemeProvider.component";
+import { QueryClientProvider } from "@/components/provider/QueryClient.component";
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
@@ -23,9 +25,12 @@ export default function RootLayout({
       <body
         className={`${montserrat.variable} antialiased`}
       >
-        <ThemeProvider attribute="class" defaultTheme="dark" themes={["light", "dark", "purple"]} enableSystem disableTransitionOnChange>
-          {children}
-        </ThemeProvider>
+        <QueryClientProvider>
+          <Toaster/>
+          <ThemeProvider attribute="class" defaultTheme="dark" themes={["light", "dark", "purple"]} enableSystem disableTransitionOnChange>
+            {children}
+          </ThemeProvider>
+        </QueryClientProvider>
       </body>
     </html>
   );

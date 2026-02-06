@@ -18,17 +18,20 @@ import { APP_GUARD } from '@nestjs/core';
       throttlers: [
         {
           name: 'short-term',
-          ttl: 1000, 
+          ttl: 1000,
           limit: 10,
         },
         {
           name: 'long-term',
-          ttl: 60 * 1000, 
+          ttl: 60 * 1000,
           limit: 100,
-        }
+        },
       ],
-      storage: new ThrottlerStorageRedisService({ host: process.env.REDIS_HOST, port: Number(process.env.REDIS_PORT) }),
-    })
+      storage: new ThrottlerStorageRedisService({
+        host: process.env.REDIS_HOST,
+        port: Number(process.env.REDIS_PORT),
+      }),
+    }),
   ],
   providers: [
     {

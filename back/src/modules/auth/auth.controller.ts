@@ -15,7 +15,6 @@ import { AtGuard } from '@/common/guards/at.guard';
 import { Request, Response } from 'express';
 import { Throttle } from '@nestjs/throttler';
 
-
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -26,7 +25,8 @@ export class AuthController {
   @ApiResponse({ status: 409, description: 'Conflict. User already exists.' })
   @ApiResponse({ status: 500, description: 'Internal Server Error.' })
   @UsePipes(ZodValidationPipe)
-  @Throttle({ short: { limit: 3, ttl: 60000 }, long: { limit: 3, ttl: 60000 } })  @Post('register')
+  @Throttle({ short: { limit: 3, ttl: 60000 }, long: { limit: 3, ttl: 60000 } })
+  @Post('register')
   async register(
     @Body() dto: RegisterDto,
     @Res({ passthrough: true }) res: Response,

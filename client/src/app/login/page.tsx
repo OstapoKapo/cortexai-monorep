@@ -8,7 +8,6 @@ import loginFields, { LoginFormData } from "@/configs/login.config";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema } from "@cortex/shared";
-import { authService } from "@/services/auth/auth.services";
 import { useLoginMutation } from "@/services/auth/auth.queries";
 
 export default function LoginPage() {
@@ -18,10 +17,10 @@ export default function LoginPage() {
     resolver: zodResolver(loginSchema),
   });
   
-  const loginMutation = useLoginMutation();
+  const { mutateAsync, isPending } = useLoginMutation();
 
   const handleLogin = async (data: LoginFormData): Promise<void> => {
-    await loginMutation.mutateAsync(data);
+    await mutateAsync(data);
   };
 
   return (
@@ -51,6 +50,7 @@ export default function LoginPage() {
           submitIcon={<ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />}
           onSubmit={handleLogin}
           className="space-y-6"
+          isLoading={isPending}
         />
 
         {/* Divider */}

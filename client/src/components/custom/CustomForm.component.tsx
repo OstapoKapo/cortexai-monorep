@@ -27,6 +27,7 @@ interface CustomFormProps<T extends FieldValues> {
   onSubmit: SubmitHandler<T>;
   className?: string;
   buttonClassName?: string;
+  isLoading?: boolean;
 }
 
 const CustomForm = <T extends FieldValues>({
@@ -37,16 +38,16 @@ const CustomForm = <T extends FieldValues>({
   onSubmit,
   className = "",
   buttonClassName = "",
+  isLoading = false,
 }: CustomFormProps<T>) => {
   
   const { handleSubmit, register, formState: { errors, isSubmitting, isValid } } = form;
-
+  const isActuallyLoading = isSubmitting || isLoading;
   return (
     <form className={className} onSubmit={handleSubmit(onSubmit)}>
       {fields.map((field) => {
         const errorMessage = errors[field.id]?.message as string | undefined;
 
-       
         const dynamicLabelExtra = field.hasForgotPassword ? (
           <Link
             href="/forgot-password"
@@ -72,9 +73,9 @@ const CustomForm = <T extends FieldValues>({
         );
       })}
 
-      <CustomButton type="submit" isLoading={isSubmitting} disabled={!isValid} className={buttonClassName} variant="primary">
+      <CustomButton type="submit" isLoading={isActuallyLoading} disabled={!isValid || isActuallyLoading} className={buttonClassName} variant="primary">
         {submitText}
-        {!isSubmitting && submitIcon}
+        {!isActuallyLoading && submitIcon}
       </CustomButton>
     </form>
   );

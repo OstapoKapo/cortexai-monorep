@@ -23,6 +23,7 @@
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^8.4.0",
     "@cortex/backend-common": "^0.0.1",
+    "@nest-lab/throttler-storage-redis": "^1.1.0",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.0.1",
@@ -30,6 +31,7 @@
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/swagger": "^11.2.5",
+    "@nestjs/throttler": "^6.5.0",
     "@prisma/adapter-pg": "^7.2.0",
     "@prisma/client": "^7.2.0",
     "argon2": "^0.44.0",
@@ -38,6 +40,7 @@
     "cookie-parser": "^1.4.7",
     "dotenv": "^17.2.3",
     "helmet": "^8.1.0",
+    "ioredis": "^5.9.2",
     "nestjs-zod": "^5.1.1",
     "passport-jwt": "^4.0.1",
     "pg": "^8.17.1",

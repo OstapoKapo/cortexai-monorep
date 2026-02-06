@@ -17,12 +17,12 @@ import { APP_GUARD } from '@nestjs/core';
     ThrottlerModule.forRoot({
       throttlers: [
         {
-          name: 'short-term',
+          name: 'short',
           ttl: 1000,
           limit: 10,
         },
         {
-          name: 'long-term',
+          name: 'long',
           ttl: 60 * 1000,
           limit: 100,
         },
@@ -31,6 +31,7 @@ import { APP_GUARD } from '@nestjs/core';
         host: process.env.REDIS_HOST,
         port: Number(process.env.REDIS_PORT),
       }),
+      errorMessage: 'Too many requests, please try again later.',
     }),
   ],
   providers: [

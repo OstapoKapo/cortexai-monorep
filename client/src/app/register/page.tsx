@@ -5,21 +5,21 @@ import { ArrowRight, Github } from "lucide-react";
 import {CustomForm} from "@/components/custom/CustomForm.component";
 import registerFields, { RegisterFormData } from "@/configs/register.config";
 import { useForm } from "react-hook-form";
-import { registerSchema } from "@cortex/shared";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { authService } from "@/services/auth/auth.services";
 import { useRegisterMutation } from "@/services/auth/auth.queries";
+import { RegisterFormSchema } from "@/types/registerFormSchema.type";
 
 export default function RegisterPage() {
 
   const form = useForm<RegisterFormData>({
     mode: "onChange",
-    resolver: zodResolver(registerSchema),
+    resolver: zodResolver(RegisterFormSchema),
 });
 
-  const registerMutation = useRegisterMutation();
+  const {mutateAsync, isPending} = useRegisterMutation();
   const handleRegister = async (data: RegisterFormData): Promise<void> => {
-    await registerMutation.mutateAsync(data);
+    const { confirmPassword, ...registerData } = data; 
+    await mutateAsync(data);
   };
 
   return (
@@ -49,6 +49,7 @@ export default function RegisterPage() {
           submitIcon={<ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />}
           onSubmit={handleRegister}
           className="space-y-6"
+          isLoading={isPending}
         />
 
         {/* Divider */}

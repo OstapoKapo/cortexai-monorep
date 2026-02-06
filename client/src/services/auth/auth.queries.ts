@@ -3,6 +3,7 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { authService } from "./auth.services";
 import { LoginDtoType, RegisterDtoType, ILoginResponse, IRegisterResponse, ILogoutResponse } from "@cortex/shared";
+import { set } from "zod";
 
 
 export const useLoginMutation = () => {
@@ -12,7 +13,8 @@ export const useLoginMutation = () => {
         mutationFn: (data) => authService.login(data),
         onSuccess: async () => {
             toast.success("Login successful!");
-            router.push("/");
+            router.refresh();
+            router.replace("/");
         },
     });
 }
@@ -24,7 +26,8 @@ export const useLogoutMutation = () => {
         mutationFn: () => authService.logout(),
         onSuccess: async () => {
             toast.success("Logout successful!");
-            router.push("/login");
+            router.refresh();
+            router.replace("/login");
         },
     });
 }
@@ -36,7 +39,8 @@ export const useRegisterMutation = () => {
         mutationFn: (data) => authService.register(data),
         onSuccess: async () => {
             toast.success("Registration successful!");
-            router.push("/");
+            router.refresh();
+            router.replace("/");
         },
     });
 }

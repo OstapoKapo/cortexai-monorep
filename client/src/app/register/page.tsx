@@ -7,6 +7,8 @@ import registerFields, { RegisterFormData } from "@/configs/register.config";
 import { useForm } from "react-hook-form";
 import { registerSchema } from "@cortex/shared";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { authService } from "@/services/auth/auth.services";
+import { useRegisterMutation } from "@/services/auth/auth.queries";
 
 export default function RegisterPage() {
 
@@ -15,8 +17,9 @@ export default function RegisterPage() {
     resolver: zodResolver(registerSchema),
 });
 
-  const handleRegister = (data: RegisterFormData): void => {
-    console.log("Register submitted", data);
+  const registerMutation = useRegisterMutation();
+  const handleRegister = async (data: RegisterFormData): Promise<void> => {
+    await registerMutation.mutateAsync(data);
   };
 
   return (

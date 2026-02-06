@@ -8,6 +8,8 @@ import loginFields, { LoginFormData } from "@/configs/login.config";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema } from "@cortex/shared";
+import { authService } from "@/services/auth/auth.services";
+import { useLoginMutation } from "@/services/auth/auth.queries";
 
 export default function LoginPage() {
 
@@ -16,8 +18,10 @@ export default function LoginPage() {
     resolver: zodResolver(loginSchema),
   });
   
-  const handleLogin = (data: LoginFormData): void => {
-    console.log("Login submitted", data);
+  const loginMutation = useLoginMutation();
+
+  const handleLogin = async (data: LoginFormData): Promise<void> => {
+    await loginMutation.mutateAsync(data);
   };
 
   return (

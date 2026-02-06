@@ -60,10 +60,13 @@ describe('AuthService', () => {
       const dto = { email: 'test@test.com', password: '123', name: 'Test' };
       const hashedPassword = 'hashed_password';
       const userId = 'user-id-123';
-      
+
       // Налаштовуємо поведінку моків
       (argon2.hash as jest.Mock).mockResolvedValue(hashedPassword);
-      mockUsersService.createUser.mockResolvedValue({ id: userId, email: dto.email });
+      mockUsersService.createUser.mockResolvedValue({
+        id: userId,
+        email: dto.email,
+      });
       mockJwtService.signAsync.mockResolvedValue('token_string');
       mockUsersService.changeUserData.mockResolvedValue(true);
 
@@ -94,7 +97,10 @@ describe('AuthService', () => {
 
       const result = await service.login(dto);
 
-      expect(result).toEqual({ accessToken: 'token_string', refreshToken: 'token_string' });
+      expect(result).toEqual({
+        accessToken: 'token_string',
+        refreshToken: 'token_string',
+      });
     });
 
     it('should throw UnauthorizedException if user not found', async () => {
@@ -120,7 +126,9 @@ describe('AuthService', () => {
       const userId = 'user-1';
       await service.logout(userId);
 
-      expect(usersService.changeUserData).toHaveBeenCalledWith(userId, { refreshToken: null });
+      expect(usersService.changeUserData).toHaveBeenCalledWith(userId, {
+        refreshToken: null,
+      });
     });
   });
 });

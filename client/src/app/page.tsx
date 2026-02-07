@@ -2,22 +2,11 @@
 
 import { useState } from "react";
 import { Sidebar, Header } from "@/components/layout";
-import {
-  ReportsPage,
-  ChatPage,
-  AnalyticsPage,
-  DocumentsPage,
-  UsersPage,
-  SettingsPage,
-} from "@/components/pages";
+import { ReportsPage, ReportGeneratorPage } from "@/components/pages";
 
 const pageComponents: Record<string, React.ComponentType> = {
   reports: ReportsPage,
-  chat: ChatPage,
-  analytics: AnalyticsPage,
-  documents: DocumentsPage,
-  users: UsersPage,
-  settings: SettingsPage,
+  generator: ReportGeneratorPage,
 };
 
 export default function Home() {

@@ -1,10 +1,6 @@
 import {
   FileText,
-  MessageSquare,
-  BarChart3,
-  Settings,
-  Users,
-  FolderOpen,
+  Sparkles,
   LucideIcon,
 } from "lucide-react";
 
@@ -16,9 +12,5 @@ export interface NavigationItem {
 
 export const navigationItems: NavigationItem[] = [
   { id: "reports", label: "Звіти", icon: FileText },
-  { id: "chat", label: "Чат з AI", icon: MessageSquare },
-  { id: "analytics", label: "Аналітика", icon: BarChart3 },
-  { id: "documents", label: "Документи", icon: FolderOpen },
-  { id: "users", label: "Користувачі", icon: Users },
-  { id: "settings", label: "Налаштування", icon: Settings },
+  { id: "generator", label: "Генератор", icon: Sparkles },
 ];

@@ -41,33 +41,18 @@ describe('AuthController', () => {
 
   describe('register', () => {
     it('should register user and set cookies', async () => {
-      const dto: RegisterDto = {
-        email: 'test@test.com',
-        password: '123',
-        name: 'Test',
-      };
-      const tokens = {
-        accessToken: 'access.token',
-        refreshToken: 'refresh.token',
-      };
-
-      mockAuthService.register.mockResolvedValue(tokens);
+      const dto: RegisterDto = { email: 'test@test.com', password: '123', name: 'Test',  };
+      const tokens = { accessToken: 'access.token', refreshToken: 'refresh.token' };
+      
+      (mockAuthService.register as jest.Mock).mockResolvedValue(tokens);
 
       const result = await controller.register(dto, mockResponse);
 
       expect(authService.register).toHaveBeenCalledWith(dto);
       // Перевіряємо, що куки встановились 2 рази (access + refresh)
       expect(mockResponse.cookie).toHaveBeenCalledTimes(2);
-      expect(mockResponse.cookie).toHaveBeenCalledWith(
-        'accessToken',
-        tokens.accessToken,
-        expect.any(Object),
-      );
-      expect(mockResponse.cookie).toHaveBeenCalledWith(
-        'refreshToken',
-        tokens.refreshToken,
-        expect.any(Object),
-      );
+      expect(mockResponse.cookie).toHaveBeenCalledWith('accessToken', tokens.accessToken, expect.any(Object));
+      expect(mockResponse.cookie).toHaveBeenCalledWith('refreshToken', tokens.refreshToken, expect.any(Object));
       expect(result).toEqual({ message: 'User registered successfully' });
     });
   });
@@ -75,12 +60,9 @@ describe('AuthController', () => {
   describe('login', () => {
     it('should login user and set cookies', async () => {
       const dto: LoginDto = { email: 'test@test.com', password: '123' };
-      const tokens = {
-        accessToken: 'access.token',
-        refreshToken: 'refresh.token',
-      };
+      const tokens = { accessToken: 'access.token', refreshToken: 'refresh.token' };
 
-      mockAuthService.login.mockResolvedValue(tokens);
+      (mockAuthService.login as jest.Mock).mockResolvedValue(tokens);
 
       const result = await controller.login(dto, mockResponse);
 
@@ -99,10 +81,7 @@ describe('AuthController', () => {
       expect(authService.logout).toHaveBeenCalledWith('123');
       // Перевіряємо очистку кук
       expect(mockResponse.clearCookie).toHaveBeenCalledWith('accessToken');
-      expect(mockResponse.clearCookie).toHaveBeenCalledWith(
-        'refreshToken',
-        expect.any(Object),
-      );
+      expect(mockResponse.clearCookie).toHaveBeenCalledWith('refreshToken', expect.any(Object));
       expect(result).toEqual({ message: 'User logged out successfully' });
     });
   });

@@ -7,7 +7,8 @@
     "client",
     "back",
     "shared",
-    "backend-common"
+    "backend-common",
+    "report-service"
   ],
   "scripts": {
     "dev": "turbo dev",

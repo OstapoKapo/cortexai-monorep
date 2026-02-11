@@ -7,15 +7,15 @@ const CreateTemplateZodDto: ZodDto<typeof UploadTemplateSchema> =
 export class CreateTemplateDto extends CreateTemplateZodDto {}
 
 export class UploadResponseDto {
-  @ApiProperty({ 
-    example: 'https://s3.amazonaws.com/bucket/file.pdf', 
-    description: 'Пряме посилання на завантажений файл' 
+  @ApiProperty({
+    example: 'https://s3.amazonaws.com/bucket/file.pdf',
+    description: 'Пряме посилання на завантажений файл',
   })
   url: string;
 
-  @ApiProperty({ 
-    example: 'Report template created successfully.', 
-    description: 'Повідомлення про успішне створення шаблону звіту' 
+  @ApiProperty({
+    example: 'Report template created successfully.',
+    description: 'Повідомлення про успішне створення шаблону звіту',
   })
   message: string;
 }

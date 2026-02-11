@@ -17,7 +17,10 @@ import {
   ApiResponse,
 } from '@nestjs/swagger';
 import { ZodValidationPipe } from 'nestjs-zod';
-import { CreateTemplateDto, UploadResponseDto } from 'src/common/dto/reports.dto';
+import {
+  CreateTemplateDto,
+  UploadResponseDto,
+} from 'src/common/dto/reports.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('templates')

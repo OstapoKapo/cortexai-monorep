@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/auth-client';
+import { PrismaClient } from '@prisma/report-service-client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { Pool } from 'pg';

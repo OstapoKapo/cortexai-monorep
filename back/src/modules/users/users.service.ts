@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { UsersRepository } from './users.repository';
-import { Prisma, User } from '@prisma/client';
+import { Prisma, User } from '@prisma/auth-client';
 import { AppErrors } from '@cortex/shared';
 
 @Injectable()

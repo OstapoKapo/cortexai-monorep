@@ -3,7 +3,7 @@ import { UsersService } from '../users/users.service';
 import { LoginDto, RegisterDto } from '@/common/dto/auth.dto';
 import { AppErrors } from '@cortex/shared';
 import * as argon2 from 'argon2';
-import { User } from '@prisma/client';
+import { User } from '@prisma/auth-client';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 

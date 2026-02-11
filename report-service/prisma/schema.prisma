@@ -7,25 +7,29 @@
 generator client {
   provider = "prisma-client-js"
   previewFeatures = ["driverAdapters"]
-  output   = "../../node_modules/@prisma/auth-client"
+  output   = "../../node_modules/@prisma/report-service-client"
 }
 
 datasource db {
   provider = "postgresql"
 }
 
-model User {
-  id String @default(uuid()) @id
-  email String @unique
-  name String
-  password String? 
-  googleId String? @unique
-  ip String? 
-  userAgent String?
-  googleAvatar String?
-  refreshToken String?
+model Template {
+  id        String   @id @default(uuid())
+
+  name        String   
+  description String? 
+
+  storageKey       String   @unique
+  originalFileName String   
+  mimeType         String?  
+  size             Int?   
+  fileUrl          String  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@map("users")
+  userId    String
+  
+  @@map("templates") 
 }

@@ -11,13 +11,15 @@ pnpm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
-
+/volume
 # OS
 .DS_Store
 
 # Tests
 /coverage
 /.nyc_output
+
+src/generated/client
 
 # IDEs and editors
 /.idea
@@ -54,3 +56,5 @@ pids
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+/generated/prisma

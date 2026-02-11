@@ -76,7 +76,7 @@ jobs:
         run: npm run build -w back
 
   report-service-check:
-    name: Backend (Lint & Build)
+    name: Report Service (Lint & Build)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -92,10 +92,10 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      # # 👇 1. Генеруємо типи Prisma (критично для лінтера)
-      # - name: Generate Prisma Client
-      #   # Вкажи правильний шлях до схеми, якщо він відрізняється
-      #   run: npx prisma generate --schema=./back/prisma/schema.prisma
+      # 👇 1. Генеруємо типи Prisma (критично для лінтера)
+      - name: Generate Prisma Client
+        # Вкажи правильний шлях до схеми, якщо він відрізняється
+        run: npx prisma generate --schema=./report-service/prisma/schema.prisma
 
       # 👇 2. Білдимо спільну бібліотеку (щоб бек бачив типи DTO)
       # Назва воркспейсу має співпадати з name у package.json shared-папки
@@ -106,7 +106,7 @@ jobs:
         run: npm run build -w @cortex/backend-common
 
       - name: Lint Backend
-        run: npm run lint -w back
+        run: npm run lint -w report-service
 
       - name: Build Backend
-        run: npm run build -w back
+        run: npm run build -w report-service

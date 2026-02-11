@@ -45,6 +45,19 @@ services:
     volumes:
       - pgdata-cortexai-users:/var/lib/postgresql/data # Унікальний том
 
+  db_files:
+    image: postgres:15-alpine
+    container_name: cortexai-files-db # Унікальне ім'я
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: cortexai-files-db # Назва БД для проекту
+    volumes:
+      - pgdata-cortexai-files:/var/lib/postgresql/data # Унікальний том
+
+
   # --- 4. Редіс ---
   redis:
     image: redis:7
@@ -69,3 +82,4 @@ services:
 # Оголошуємо унікальний том для даних БД
 volumes:
   pgdata-cortexai-users:
+  pgdata-cortexai-files:

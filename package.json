@@ -8,7 +8,8 @@
     "back",
     "shared",
     "backend-common",
-    "report-service"
+    "report-service",
+    "gateway"
   ],
   "scripts": {
     "dev": "turbo dev",

@@ -75,7 +75,9 @@ services:
     environment:
       - DEBUG=${DEBUG-}
       - DOCKER_HOST=unix:///var/run/docker.sock
+      - PERSISTENCE=1
     volumes:
+      - "./ls-data:/var/lib/localstack"
       - "${LOCALSTACK_VOLUME_DIR-./volume}:/var/lib/localstack"
       - "/var/run/docker.sock:/var/run/docker.sock"
 

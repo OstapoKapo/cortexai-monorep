@@ -53,12 +53,12 @@ export class AuthController {
     } catch (error: unknown) {
       const axiosError = error as AxiosError;
       const message = axiosError.message;
-      
+
       console.error(`Помилка при виклику AuthService: ${message}`);
 
       if (axiosError.response) {
         throw new HttpException(
-          axiosError.response.data || message, 
+          axiosError.response.data || message,
           axiosError.response.status || 500,
         );
       }
@@ -76,9 +76,7 @@ export class AuthController {
   @ApiResponse({ status: 409, description: 'Conflict. User already exists.' })
   @ApiResponse({ status: 500, description: 'Internal Server Error.' })
   @UsePipes(ZodValidationPipe)
-  async register(
-    @Body() registerDto: RegisterDto,
-  ): Promise<AuthResponseDto> {
+  async register(@Body() registerDto: RegisterDto): Promise<AuthResponseDto> {
     try {
       const { data } = await firstValueFrom(
         this.httpService.post<AuthResponseDto>(

@@ -11,7 +11,6 @@ import { Post } from '@nestjs/common';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { AuthService } from './auth.service';
-import { AtGuard } from '@/common/guards/at.guard';
 import { Request, Response } from 'express';
 import { Throttle } from '@nestjs/throttler';
 
@@ -57,7 +56,6 @@ export class AuthController {
     return { message: 'User logged in successfully' };
   }
 
-  @UseGuards(AtGuard)
   @ApiOperation({ summary: 'Logout a user' })
   @ApiResponse({ status: 200, description: 'User logged out successfully.' })
   @ApiResponse({ status: 500, description: 'Internal Server Error.' })
@@ -72,7 +70,6 @@ export class AuthController {
     return { message: 'User logged out successfully' };
   }
 
-  @UseGuards(AtGuard)
   @ApiOperation({ summary: 'Get current user info' })
   @ApiResponse({
     status: 200,

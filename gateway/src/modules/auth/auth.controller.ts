@@ -3,6 +3,7 @@ import {
   Controller,
   HttpException,
   Post,
+  Res,
   UsePipes,
 } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
@@ -15,17 +16,20 @@ import {
 import { firstValueFrom } from 'rxjs';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { ApiResponse } from '@nestjs/swagger';
-import { AxiosError } from 'axios'; // 👈 1. Імпортуємо тип помилки
+import axios, { AxiosError } from 'axios';
+import type { Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
-  private readonly authServiceUrl: string | undefined;
+  private readonly authServiceUrl: string;
 
   constructor(
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
   ) {
-    this.authServiceUrl = this.configService.get<string>('AUTH_SERVICE_URL');
+    this.authServiceUrl =
+      this.configService.get<string>('AUTH_SERVICE_URL') ??
+      'http://localhost:3002';
   }
 
   @Post('login')
@@ -41,28 +45,36 @@ export class AuthController {
   })
   @ApiResponse({ status: 500, description: 'Internal Server Error.' })
   @UsePipes(ZodValidationPipe)
-  async login(@Body() loginDto: LoginDto): Promise<AuthResponseDto> {
+  async login(
+    @Body() loginDto: LoginDto,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<AuthResponseDto> {
     try {
-      const { data } = await firstValueFrom(
+      const authResponse = await firstValueFrom(
         this.httpService.post<AuthResponseDto>(
           `${this.authServiceUrl}/auth/login`,
           loginDto,
         ),
       );
-      return data;
+      this.forwardSetCookieHeaders(authResponse.headers['set-cookie'], res);
+      return authResponse.data;
     } catch (error: unknown) {
-      const axiosError = error as AxiosError;
-      const message = axiosError.message;
+      if (axios.isAxiosError(error)) {
+        const axiosError: AxiosError = error;
+        const message = axiosError.message || 'Auth service is unavailable';
+        console.error(`Помилка при виклику AuthService: ${message}`);
 
-      console.error(`Помилка при виклику AuthService: ${message}`);
+        if (axiosError.response) {
+          throw new HttpException(
+            axiosError.response.data || message,
+            axiosError.response.status || 500,
+          );
+        }
 
-      if (axiosError.response) {
-        throw new HttpException(
-          axiosError.response.data || message,
-          axiosError.response.status || 500,
-        );
+        throw new HttpException(message, 503);
       }
-      throw new HttpException(message, 500);
+
+      throw new HttpException('Unexpected auth gateway error', 500);
     }
   }
 
@@ -76,28 +88,50 @@ export class AuthController {
   @ApiResponse({ status: 409, description: 'Conflict. User already exists.' })
   @ApiResponse({ status: 500, description: 'Internal Server Error.' })
   @UsePipes(ZodValidationPipe)
-  async register(@Body() registerDto: RegisterDto): Promise<AuthResponseDto> {
+  async register(
+    @Body() registerDto: RegisterDto,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<AuthResponseDto> {
     try {
-      const { data } = await firstValueFrom(
+      const authResponse = await firstValueFrom(
         this.httpService.post<AuthResponseDto>(
           `${this.authServiceUrl}/auth/register`,
           registerDto,
         ),
       );
-      return data;
+      this.forwardSetCookieHeaders(authResponse.headers['set-cookie'], res);
+      return authResponse.data;
     } catch (error: unknown) {
-      const axiosError = error as AxiosError;
-      const message = axiosError.message;
+      if (axios.isAxiosError(error)) {
+        const axiosError: AxiosError = error;
+        const message = axiosError.message || 'Auth service is unavailable';
+        console.error(`Помилка при виклику AuthService: ${message}`);
 
-      console.error(`Помилка при виклику AuthService: ${message}`);
+        if (axiosError.response) {
+          throw new HttpException(
+            axiosError.response.data || message,
+            axiosError.response.status || 500,
+          );
+        }
 
-      if (axiosError.response) {
-        throw new HttpException(
-          axiosError.response.data || message,
-          axiosError.response.status || 500,
-        );
+        throw new HttpException(message, 503);
       }
-      throw new HttpException(message, 500);
+
+      throw new HttpException('Unexpected auth gateway error', 500);
+    }
+  }
+
+  private forwardSetCookieHeaders(
+    setCookieHeader: string[] | string | undefined,
+    res: Response,
+  ): void {
+    if (Array.isArray(setCookieHeader) && setCookieHeader.length > 0) {
+      res.setHeader('Set-Cookie', setCookieHeader);
+      return;
+    }
+
+    if (typeof setCookieHeader === 'string' && setCookieHeader.length > 0) {
+      res.setHeader('Set-Cookie', [setCookieHeader]);
     }
   }
 }

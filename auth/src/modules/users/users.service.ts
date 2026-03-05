@@ -2,7 +2,9 @@ import {
   ConflictException,
   Injectable,
   InternalServerErrorException,
+  Logger,
   NotFoundException,
+  ServiceUnavailableException,
 } from '@nestjs/common';
 import { UsersRepository } from './users.repository';
 import { Prisma, User } from '@prisma/auth-client';
@@ -10,6 +12,8 @@ import { AppErrors } from '@cortex/shared';
 
 @Injectable()
 export class UsersService {
+  private readonly logger = new Logger(UsersService.name);
+
   constructor(private readonly usersRepository: UsersRepository) {}
 
   async getAllUsers(): Promise<User[]> {
@@ -50,7 +54,22 @@ export class UsersService {
   async getUserByEmail(email: string): Promise<User | null> {
     try {
       return await this.usersRepository.findByEmail(email);
-    } catch {
+    } catch (err: unknown) {
+      if (err instanceof Prisma.PrismaClientInitializationError) {
+        throw new ServiceUnavailableException(
+          'Auth database is unavailable. Check Postgres connection.',
+        );
+      }
+      if (err instanceof Prisma.PrismaClientKnownRequestError) {
+        if (err.code === 'ECONNREFUSED') {
+          throw new ServiceUnavailableException(
+            'Auth database is unavailable. Check Postgres connection.',
+          );
+        }
+      }
+      if (err instanceof Error) {
+        this.logger.error(`getUserByEmail failed: ${err.message}`, err.stack);
+      }
       throw new InternalServerErrorException(AppErrors.SYSTEM.INTERNAL_ERROR);
     }
   }

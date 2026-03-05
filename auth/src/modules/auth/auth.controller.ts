@@ -1,12 +1,5 @@
 import { LoginDto, RegisterDto } from '@/common/dto/auth.dto';
-import {
-  Body,
-  Controller,
-  Req,
-  Res,
-  UseGuards,
-  UsePipes,
-} from '@nestjs/common';
+import { Body, Controller, Req, Res, UsePipes } from '@nestjs/common';
 import { Post } from '@nestjs/common';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ZodValidationPipe } from 'nestjs-zod';
@@ -24,7 +17,10 @@ export class AuthController {
   @ApiResponse({ status: 409, description: 'Conflict. User already exists.' })
   @ApiResponse({ status: 500, description: 'Internal Server Error.' })
   @UsePipes(ZodValidationPipe)
-  @Throttle({ short: { limit: 3, ttl: 60000 }, long: { limit: 3, ttl: 60000 } })
+  @Throttle({
+    short: { limit: 100, ttl: 60000 },
+    long: { limit: 300, ttl: 60000 },
+  })
   @Post('register')
   async register(
     @Body() dto: RegisterDto,
@@ -45,7 +41,10 @@ export class AuthController {
   })
   @ApiResponse({ status: 500, description: 'Internal Server Error.' })
   @UsePipes(ZodValidationPipe)
-  @Throttle({ short: { limit: 3, ttl: 60000 }, long: { limit: 3, ttl: 60000 } })
+  @Throttle({
+    short: { limit: 100, ttl: 60000 },
+    long: { limit: 300, ttl: 60000 },
+  })
   @Post('login')
   async login(
     @Body() dto: LoginDto,

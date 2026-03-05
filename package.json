@@ -5,6 +5,7 @@
   "packageManager": "npm@11.6.0",
   "workspaces": [
     "client",
+    "auth",
     "back",
     "shared",
     "backend-common",

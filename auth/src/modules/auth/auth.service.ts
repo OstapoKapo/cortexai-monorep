@@ -52,15 +52,22 @@ export class AuthService {
     userId: string,
     email: string,
   ): Promise<{ accessToken: string; refreshToken: string }> {
+    const accessSecret =
+      this.configService.get<string>('JWT_ACCESS_SECRET') ??
+      'dev-auth-access-secret';
+    const refreshSecret =
+      this.configService.get<string>('JWT_REFRESH_SECRET') ??
+      'dev-auth-refresh-secret';
+
     const payload = { sub: userId, email: email };
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
         expiresIn: '1h',
-        secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
+        secret: accessSecret,
       }),
       this.jwtService.signAsync(payload, {
         expiresIn: '7d',
-        secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+        secret: refreshSecret,
       }),
     ]);
     const hashedRefreshToken = await this.hashPassword(refreshToken);

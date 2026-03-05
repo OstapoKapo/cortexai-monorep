@@ -118,7 +118,10 @@ export class HttpFactoryService {
     }
 
     public getDirectUrl(): string | undefined {
-        return process.env.NEXT_PUBLIC_NEST_INTERNAL_URL || "http://localhost:4000/api";
+        return (
+            process.env.NEXT_PUBLIC_API_URL ||
+            '/api/proxy'
+        );
     }
 
     public createHttpService(): HttpService {

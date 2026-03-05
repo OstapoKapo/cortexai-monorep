@@ -34,9 +34,7 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
-  const PORT = process.env.PORT;
-  if (!PORT) throw new Error('No PORT specified in env file');
-
-  await app.listen(process.env.PORT ?? 8000);
+  const port = Number(process.env.PORT ?? '3001');
+  await app.listen(port);
 }
 void bootstrap();

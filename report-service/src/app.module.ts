@@ -3,7 +3,11 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ReportsModule } from './modules/reports/reports.module';
 import { S3Module } from './modules/s3/s3.module';
 import { CorrelationIDMiddleware } from '@cortex/backend-common';
-import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import {
+  ThrottlerGuard,
+  ThrottlerModule,
+  ThrottlerModuleOptions,
+} from '@nestjs/throttler';
 import { ThrottlerStorageRedisService } from '@nest-lab/throttler-storage-redis';
 import { APP_GUARD } from '@nestjs/core';
 import { PrismaModule } from './modules/prisma/prisma.module';
@@ -19,20 +23,36 @@ import { TemplatesModule } from './modules/templates/templates.module';
     ThrottlerModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        throttlers: [
-          {
-            name: 'default',
-            ttl: configService.getOrThrow<number>('THROTTLE_TTL'),
-            limit: configService.getOrThrow<number>('THROTTLE_LIMIT'),
-          },
-        ],
-        storage: new ThrottlerStorageRedisService({
-          host: configService.getOrThrow<string>('REDIS_HOST'),
-          port: configService.getOrThrow<number>('REDIS_PORT'),
-        }),
-        errorMessage: 'Too many requests, please try again later.',
-      }),
+      useFactory: (configService: ConfigService): ThrottlerModuleOptions => {
+        const options: ThrottlerModuleOptions = {
+          throttlers: [
+            {
+              name: 'default',
+              ttl: Number(configService.get<string>('THROTTLE_TTL') ?? '60'),
+              limit: Number(
+                configService.get<string>('THROTTLE_LIMIT') ?? '100',
+              ),
+            },
+          ],
+          errorMessage: 'Too many requests, please try again later.',
+        };
+
+        const redisHost = configService.get<string>('REDIS_HOST');
+        const redisPortRaw = configService.get<string>('REDIS_PORT');
+        const redisPort = redisPortRaw ? Number(redisPortRaw) : null;
+
+        if (redisHost && redisPort !== null && Number.isFinite(redisPort)) {
+          return {
+            ...options,
+            storage: new ThrottlerStorageRedisService({
+              host: redisHost,
+              port: redisPort,
+            }),
+          };
+        }
+
+        return options;
+      },
     }),
   ],
   controllers: [],

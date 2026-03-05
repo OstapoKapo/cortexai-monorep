@@ -45,7 +45,7 @@ export class S3Service implements OnModuleInit {
       return `${endpoint}/${this.bucketName}/${key}`;
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error);
-      this.logger.error(`Помилка завантаження файлу в S3: ${message}`);
+      this.logger.error(`Failed to upload file to S3: ${message}`);
       throw error;
     }
   }
@@ -59,7 +59,7 @@ export class S3Service implements OnModuleInit {
       await this.s3Client.send(command);
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error);
-      this.logger.error(`Помилка видалення файлу з S3: ${message}`);
+      this.logger.error(`Failed to delete file from S3: ${message}`);
       throw error;
     }
   }

@@ -6,25 +6,19 @@ import { Pool } from 'pg';
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit {
   private static resolveDatabaseUrl(): string {
-    const fallbackUrl =
-      'postgres://postgres:admin@localhost:5432/cortexai-users-db';
-    const rawUrl = process.env.DATABASE_URL;
+    const databaseUrl = process.env.DATABASE_URL;
 
-    if (!rawUrl) {
-      return fallbackUrl;
+    if (!databaseUrl) {
+      throw new Error(
+        'DATABASE_URL environment variable is required but not set',
+      );
     }
 
     try {
-      const parsedUrl = new URL(rawUrl);
-      if (
-        parsedUrl.protocol.startsWith('postgres') &&
-        parsedUrl.password.length === 0
-      ) {
-        parsedUrl.password = 'admin';
-      }
-      return parsedUrl.toString();
+      new URL(databaseUrl);
+      return databaseUrl;
     } catch {
-      return fallbackUrl;
+      throw new Error('DATABASE_URL environment variable is not a valid URL');
     }
   }
 

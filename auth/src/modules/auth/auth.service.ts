@@ -52,12 +52,14 @@ export class AuthService {
     userId: string,
     email: string,
   ): Promise<{ accessToken: string; refreshToken: string }> {
-    const accessSecret =
-      this.configService.get<string>('JWT_ACCESS_SECRET') ??
-      'dev-auth-access-secret';
-    const refreshSecret =
-      this.configService.get<string>('JWT_REFRESH_SECRET') ??
-      'dev-auth-refresh-secret';
+    const accessSecret = this.configService.get<string>('JWT_ACCESS_SECRET');
+    const refreshSecret = this.configService.get<string>('JWT_REFRESH_SECRET');
+
+    if (!accessSecret || !refreshSecret) {
+      throw new Error(
+        'JWT_ACCESS_SECRET and JWT_REFRESH_SECRET environment variables are required',
+      );
+    }
 
     const payload = { sub: userId, email: email };
     const [accessToken, refreshToken] = await Promise.all([

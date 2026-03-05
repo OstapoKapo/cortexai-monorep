@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   HttpException,
+  Logger,
   Post,
   Res,
   UsePipes,
@@ -21,6 +22,7 @@ import type { Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
+  private readonly logger = new Logger(AuthController.name);
   private readonly authServiceUrl: string;
 
   constructor(
@@ -62,7 +64,7 @@ export class AuthController {
       if (axios.isAxiosError(error)) {
         const axiosError: AxiosError = error;
         const message = axiosError.message || 'Auth service is unavailable';
-        console.error(`Помилка при виклику AuthService: ${message}`);
+        this.logger.error(`AuthService request failed: ${message}`);
 
         if (axiosError.response) {
           throw new HttpException(
@@ -105,7 +107,7 @@ export class AuthController {
       if (axios.isAxiosError(error)) {
         const axiosError: AxiosError = error;
         const message = axiosError.message || 'Auth service is unavailable';
-        console.error(`Помилка при виклику AuthService: ${message}`);
+        this.logger.error(`AuthService request failed: ${message}`);
 
         if (axiosError.response) {
           throw new HttpException(

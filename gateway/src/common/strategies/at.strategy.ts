@@ -6,8 +6,13 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 @Injectable()
 export class AtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(configService: ConfigService) {
-    const jwtAccessSecret =
-      configService.get<string>('JWT_ACCESS_SECRET') ?? 'dev-access-secret';
+    const jwtAccessSecret = configService.get<string>('JWT_ACCESS_SECRET');
+
+    if (!jwtAccessSecret) {
+      throw new Error(
+        'JWT_ACCESS_SECRET environment variable is required but not set',
+      );
+    }
 
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),

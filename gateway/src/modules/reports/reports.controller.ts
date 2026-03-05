@@ -1,5 +1,5 @@
 import { HttpService } from '@nestjs/axios';
-import { Controller, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Controller, Logger, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   ApiBearerAuth,
@@ -11,16 +11,21 @@ import type { Request, Response } from 'express';
 import { UploadResponseDto } from 'src/common/dto/reports.dto';
 import { AtGuard } from 'src/common/guards/at.guard';
 import { AxiosError } from 'axios';
-import { Readable } from 'stream'; // 👈 1. Імпортуємо тип Stream
+import { Readable } from 'stream';
+
+const MAX_ERROR_BODY_SIZE = 1024 * 1024; // 1MB limit for error responses
 
 @Controller('reports')
 export class ReportsController {
-  private readonly reportsUrl: string | undefined;
+  private readonly logger = new Logger(ReportsController.name);
+  private readonly reportsUrl: string;
   constructor(
     private readonly configService: ConfigService,
     private readonly httpService: HttpService,
   ) {
-    this.reportsUrl = this.configService.get<string>('REPORTS_SERVICE_URL');
+    this.reportsUrl =
+      this.configService.get<string>('REPORTS_SERVICE_URL') ??
+      'http://localhost:3003';
   }
 
   @Post('template')
@@ -81,41 +86,50 @@ export class ReportsController {
         res.setHeader(key, response.headers[key]);
       });
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-      response.data.pipe(res);
+      (response.data as Readable).pipe(res);
     } catch (err) {
-      const error = err as AxiosError<any>;
+      const error = err as AxiosError<unknown>;
 
       if (error.response) {
-        const responseData = error.response.data as unknown;
+        const responseData = error.response.data;
 
         if (responseData instanceof Readable) {
           const errorBuffer: Buffer[] = [];
+          let totalSize = 0;
 
           for await (const chunk of responseData) {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-            errorBuffer.push(Buffer.from(chunk));
+            const buffer = Buffer.from(chunk as ArrayBuffer);
+            totalSize += buffer.length;
+
+            if (totalSize > MAX_ERROR_BODY_SIZE) {
+              responseData.destroy();
+              res.status(502).json({
+                message: 'Error response from service exceeded size limit',
+              });
+              return;
+            }
+
+            errorBuffer.push(buffer);
           }
           const errorString = Buffer.concat(errorBuffer).toString('utf8');
           try {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-            const errorJson = JSON.parse(errorString);
-            console.error('🔴 ПОМИЛКА ВІД СЕРВІСУ (JSON):', errorJson);
+            const errorJson: unknown = JSON.parse(errorString);
+            this.logger.error('Service error (JSON):', errorJson);
 
             res.status(error.response.status).json(errorJson);
           } catch {
-            console.error('🔴 ПОМИЛКА ВІД СЕРВІСУ (TEXT):', errorString);
+            this.logger.error('Service error (TEXT):', errorString);
 
             res.status(error.response.status).send(errorString);
           }
           return;
         }
 
-        console.error('🔴 ПОМИЛКА ВІД СЕРВІСУ:', error.response.data);
+        this.logger.error('Service error:', error.response.data);
 
         res.status(error.response.status).json(error.response.data);
       } else {
-        console.error('🔴 КРИТИЧНА ПОМИЛКА ГЕЙТВЕЯ:', error.message);
+        this.logger.error('Gateway critical error:', error.message);
         res.status(500).json({ message: error.message });
       }
     }

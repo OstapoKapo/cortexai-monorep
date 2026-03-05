@@ -1,5 +1,5 @@
 import { LoginDto, RegisterDto } from '@/common/dto/auth.dto';
-import { Body, Controller, Req, Res, UsePipes } from '@nestjs/common';
+import { Body, Controller, Logger, Req, Res, UsePipes } from '@nestjs/common';
 import { Post } from '@nestjs/common';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ZodValidationPipe } from 'nestjs-zod';
@@ -9,6 +9,8 @@ import { Throttle } from '@nestjs/throttler';
 
 @Controller('auth')
 export class AuthController {
+  private readonly logger = new Logger(AuthController.name);
+
   constructor(private readonly authService: AuthService) {}
 
   @ApiOperation({ summary: 'Register a new user' })
@@ -26,7 +28,7 @@ export class AuthController {
     @Body() dto: RegisterDto,
     @Res({ passthrough: true }) res: Response,
   ): Promise<{ message?: string }> {
-    console.log('Register DTO:', dto);
+    this.logger.debug(`Register attempt for email: ${dto.email}`);
     const result = await this.authService.register(dto);
     this.createCookie(res, result.accessToken, result.refreshToken);
     return { message: 'User registered successfully' };

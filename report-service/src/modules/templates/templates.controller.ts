@@ -1,7 +1,9 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
+  Headers,
   HttpStatus,
   ParseFilePipeBuilder,
   Post,
@@ -54,6 +56,7 @@ export class TemplatesController {
   })
   @UsePipes(ZodValidationPipe)
   async createTemplate(
+    @Headers('x-user-id') userId: string | undefined,
     @Body() dto: CreateTemplateDto,
     @UploadedFile(
       new ParseFilePipeBuilder()
@@ -63,7 +66,9 @@ export class TemplatesController {
     )
     file: Express.Multer.File,
   ): Promise<UploadResponseDto> {
-    const userId = 'some-user-id'; // Replace with actual user I
+    if (!userId) {
+      throw new BadRequestException('X-User-Id header is required');
+    }
 
     const result = await this.templatesService.createTemplate(
       userId,
@@ -74,7 +79,9 @@ export class TemplatesController {
   }
 
   @Get()
-  async getTemplates() {
-    // Логіка для отримання шаблонів
+  async getTemplates(): Promise<{ message: string }> {
+    // TODO: Implement template listing
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    return { message: 'Not implemented yet' };
   }
 }

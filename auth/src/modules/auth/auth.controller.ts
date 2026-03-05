@@ -1,11 +1,5 @@
 import { LoginDto, RegisterDto } from '@/common/dto/auth.dto';
-import {
-  Body,
-  Controller,
-  Req,
-  Res,
-  UsePipes,
-} from '@nestjs/common';
+import { Body, Controller, Req, Res, UsePipes } from '@nestjs/common';
 import { Post } from '@nestjs/common';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ZodValidationPipe } from 'nestjs-zod';

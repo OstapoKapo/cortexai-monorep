@@ -112,16 +112,20 @@ export class HttpFactoryService {
 
     private getBaseUrl(): string | undefined {
         if (typeof window === 'undefined') {
+            // SSR: direct to gateway via internal network
             return process.env.NEST_INTERNAL_URL || undefined;
         }
+        // CSR: use proxy (default axios baseUrl)
         return undefined;
     }
 
-    public getDirectUrl(): string | undefined {
-        return (
-            process.env.NEXT_PUBLIC_API_URL ||
-            '/api/proxy'
-        );
+    public getDirectUrl(): string {
+        // For auth (login/register) - always direct to gateway, no proxy
+        // Browser needs public URL, SSR can use internal
+        if (typeof window === 'undefined') {
+            return process.env.NEST_INTERNAL_URL || 'http://localhost:3001';
+        }
+        return process.env.NEXT_PUBLIC_GATEWAY_URL || 'http://localhost:3001';
     }
 
     public createHttpService(): HttpService {

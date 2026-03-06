@@ -54,6 +54,10 @@ export class AuthService {
   ): Promise<{ accessToken: string; refreshToken: string }> {
     const accessSecret = this.configService.get<string>('JWT_ACCESS_SECRET');
     const refreshSecret = this.configService.get<string>('JWT_REFRESH_SECRET');
+    const accessExpiresIn =
+      this.configService.get<string>('JWT_ACCESS_EXPIRES') ?? '1h';
+    const refreshExpiresIn =
+      this.configService.get<string>('JWT_REFRESH_EXPIRES') ?? '7d';
 
     if (!accessSecret || !refreshSecret) {
       throw new Error(
@@ -64,11 +68,11 @@ export class AuthService {
     const payload = { sub: userId, email: email };
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
-        expiresIn: '1h',
+        expiresIn: accessExpiresIn as `${number}h`,
         secret: accessSecret,
       }),
       this.jwtService.signAsync(payload, {
-        expiresIn: '7d',
+        expiresIn: refreshExpiresIn as `${number}d`,
         secret: refreshSecret,
       }),
     ]);

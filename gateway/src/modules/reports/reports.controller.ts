@@ -15,6 +15,9 @@ import { Readable } from 'stream';
 
 const MAX_ERROR_BODY_SIZE = 1024 * 1024; // 1MB limit for error responses
 
+// TODO: Add file size limit guard/middleware to prevent oversized uploads
+// Consider using Content-Length header check or streaming byte counter
+
 @Controller('reports')
 export class ReportsController {
   private readonly logger = new Logger(ReportsController.name);

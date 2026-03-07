@@ -52,8 +52,12 @@ export class HttpExceptionFilter implements ExceptionFilter {
       correlationID,
     };
 
+    const service = process.env.npm_package_name || process.env.SERVICE_NAME || 'unknown-service';
+
+
+
     this.logger.error(
-      `[${status}] ${request.method} ${request.url} - Error: ${JSON.stringify(message)}`,
+      `[${service}] [${status}] ${request.method} ${request.url} - Error: ${JSON.stringify({ ...errorResponse, service })}`,
       exception instanceof Error ? exception.stack : String(exception)
     );
 

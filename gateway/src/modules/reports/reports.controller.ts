@@ -1,5 +1,6 @@
 import { HttpService } from '@nestjs/axios';
-import { Controller, Logger, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Controller, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { ProxyService } from '../../common/services/proxy.service';
 import { ConfigService } from '@nestjs/config';
 import {
   ApiBearerAuth,
@@ -10,21 +11,14 @@ import {
 import type { Request, Response } from 'express';
 import { UploadResponseDto } from 'src/common/dto/reports.dto';
 import { AtGuard } from 'src/common/guards/at.guard';
-import { AxiosError } from 'axios';
-import { Readable } from 'stream';
-
-const MAX_ERROR_BODY_SIZE = 1024 * 1024; // 1MB limit for error responses
-
-// TODO: Add file size limit guard/middleware to prevent oversized uploads
-// Consider using Content-Length header check or streaming byte counter
 
 @Controller('reports')
 export class ReportsController {
-  private readonly logger = new Logger(ReportsController.name);
   private readonly reportsUrl: string;
   constructor(
     private readonly configService: ConfigService,
     private readonly httpService: HttpService,
+    private readonly proxyService: ProxyService,
   ) {
     this.reportsUrl =
       this.configService.get<string>('REPORTS_SERVICE_URL') ??
@@ -61,80 +55,33 @@ export class ReportsController {
   })
   @ApiResponse({ status: 500, description: 'Internal Server Error.' })
   async createReportTemplate(
-    @Req() req: Request & { user: { userId: string; email: string } },
+    @Req()
+    req: Request & {
+      user: { userId: string; email: string };
+      correlationID?: string;
+    },
     @Res() res: Response,
   ): Promise<void> {
     const userId = req.user.userId;
-
-    const headers: Record<string, any> = { ...req.headers };
-
-    delete headers['content-length'];
-    delete headers['host'];
-    delete headers['connection'];
-    delete headers['transfer-encoding'];
+    let correlationId = req.correlationID || req.headers['x-correlation-id'];
+    if (Array.isArray(correlationId)) correlationId = correlationId[0];
+    const headers: Record<string, string | string[] | undefined> = {
+      ...req.headers,
+    };
     headers['X-User-Id'] = userId;
+    if (correlationId) headers['X-Correlation-ID'] = correlationId;
 
-    try {
-      const response = await this.httpService.axiosRef({
-        method: 'POST',
-        url: `${this.reportsUrl}/templates/template`,
-        data: req,
-        responseType: 'stream',
-        headers: headers,
-      });
-
-      res.status(response.status);
-
-      Object.keys(response.headers).forEach((key) => {
-        res.setHeader(key, response.headers[key]);
-      });
-
-      (response.data as Readable).pipe(res);
-    } catch (err) {
-      const error = err as AxiosError<unknown>;
-
-      if (error.response) {
-        const responseData = error.response.data;
-
-        if (responseData instanceof Readable) {
-          const errorBuffer: Buffer[] = [];
-          let totalSize = 0;
-
-          for await (const chunk of responseData) {
-            const buffer = Buffer.from(chunk as ArrayBuffer);
-            totalSize += buffer.length;
-
-            if (totalSize > MAX_ERROR_BODY_SIZE) {
-              responseData.destroy();
-              res.status(502).json({
-                message: 'Error response from service exceeded size limit',
-              });
-              return;
-            }
-
-            errorBuffer.push(buffer);
-          }
-          const errorString = Buffer.concat(errorBuffer).toString('utf8');
-          try {
-            const errorJson: unknown = JSON.parse(errorString);
-            this.logger.error('Service error (JSON):', errorJson);
-
-            res.status(error.response.status).json(errorJson);
-          } catch {
-            this.logger.error('Service error (TEXT):', errorString);
-
-            res.status(error.response.status).send(errorString);
-          }
-          return;
-        }
-
-        this.logger.error('Service error:', error.response.data);
-
-        res.status(error.response.status).json(error.response.data);
-      } else {
-        this.logger.error('Gateway critical error:', error.message);
-        res.status(500).json({ message: error.message });
-      }
-    }
+    await this.proxyService.forwardRequest(
+      () =>
+        this.httpService.axiosRef({
+          method: 'POST',
+          url: `${this.reportsUrl}/templates/template`,
+          data: req,
+          responseType: 'stream',
+          headers,
+        }),
+      res,
+      { forwardSetCookie: false, logCorrelationId: correlationId },
+    );
   }
 }

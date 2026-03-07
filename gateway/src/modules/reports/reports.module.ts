@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ProxyService } from '../../common/services/proxy.service';
 import { ReportsController } from './reports.controller';
 import { ConfigModule } from '@nestjs/config';
 import { HttpModule } from '@nestjs/axios';
@@ -14,6 +15,6 @@ import { PassportModule } from '@nestjs/passport';
     JwtModule.register({}),
     PassportModule.register({ defaultStrategy: 'jwt' }),
   ],
-  providers: [AtStrategy],
+  providers: [AtStrategy, ProxyService],
 })
 export class ReportsModule {}

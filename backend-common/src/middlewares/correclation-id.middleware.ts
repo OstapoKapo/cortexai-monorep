@@ -1,17 +1,25 @@
 import { Request, Response, NextFunction } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 
-interface RequestWithCorrelationID extends Request {
-	correlationID?: string;
+export interface RequestWithCorrelationID extends Request {
+    correlationID: string;
 }
 
 export function CorrelationIDMiddleware(
-	req: RequestWithCorrelationID,
-	res: Response,
-	next: NextFunction,
+    req: RequestWithCorrelationID,
+    res: Response,
+    next: NextFunction,
 ) {
-	const correlationID = uuidv4();
-	req['correlationID'] = correlationID;
-	res.setHeader('X-Correlation-ID', correlationID);
-	next();
+    let incomingId = req.headers['x-correlation-id'];
+    if (Array.isArray(incomingId)) incomingId = incomingId[0];
+    
+    const correlationID = incomingId || uuidv4();
+
+    req.correlationID = correlationID; 
+    
+    req.headers['x-correlation-id'] = correlationID; 
+    
+    res.setHeader('X-Correlation-ID', correlationID); 
+    
+    next();
 }

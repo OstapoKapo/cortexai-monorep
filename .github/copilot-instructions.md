@@ -1,5 +1,160 @@
 # CortexAI Copilot Instructions
 
+## Project Overview
+Monorepo with microservices: client (Next.js), gateway (NestJS), auth (NestJS), report-service (NestJS).
+Shared packages: `@cortex/shared` (types, schemas), `@cortex/backend-common` (filters, interceptors).
+
+## Frontend Libraries (client/)
+
+### Next.js 16 + React 19
+- Use App Router (`src/app/`), not Pages Router
+- Server Components by default, add `"use client"` only when needed (hooks, state, refs)
+- React Compiler enabled — keep components pure
+
+### React Hook Form v7 + Zod
+```typescript
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { loginSchema, LoginDtoType } from '@cortex/shared';
+
+const form = useForm<LoginDtoType>({
+  resolver: zodResolver(loginSchema),
+  defaultValues: { email: '', password: '' },
+});
+```
+- Always use `zodResolver` with schemas from `@cortex/shared`
+- Prefer `register()` for simple inputs, `Controller` for complex (select, datepicker)
+
+### TanStack Query v5
+```typescript
+import { useQuery, useMutation } from '@tanstack/react-query';
+
+// Queries - use array keys
+const { data } = useQuery({
+  queryKey: ['users', userId],
+  queryFn: () => fetchUser(userId),
+});
+
+// Mutations - invalidate on success
+const mutation = useMutation({
+  mutationFn: createUser,
+  onSuccess: () => queryClient.invalidateQueries({ queryKey: ['users'] }),
+});
+```
+
+### Axios
+- HTTP client configured in `src/services/http/`
+- Use `httpFactory.createAuthClient()` for authenticated requests
+- Use `httpFactory.createPublicClient()` for public requests
+- Proxy through `/api/proxy` for CSR to handle cookies
+
+### Tailwind CSS v4
+- Use `@import "tailwindcss";` and `@theme inline` syntax
+- Prefer semantic tokens: `bg-card`, `text-muted-foreground`, `border-border`
+- Dark mode via `darkMode: "class"` on `<html>`
+
+### Other Frontend
+- **lucide-react**: Icon library, import individually `import { User } from 'lucide-react'`
+- **next-themes**: Theme switching, use `useTheme()` hook
+- **react-hot-toast**: Notifications, use `toast.success()`, `toast.error()`
+
+## Backend Libraries (auth/, gateway/)
+
+### NestJS 11
+- Modular architecture: `*.module.ts`, `*.controller.ts`, `*.service.ts`
+- Use Dependency Injection via constructor
+- Guards for auth: `@UseGuards(AtGuard)`
+- Pipes for validation: `ZodValidationPipe` globally applied
+
+### Prisma 7
+```typescript
+// New config format in prisma.config.ts (not schema.prisma url)
+import { defineConfig } from 'prisma/config';
+export default defineConfig({
+  datasource: { url: process.env.DATABASE_URL },
+});
+
+// Service pattern
+@Injectable()
+export class UsersService {
+  constructor(private prisma: PrismaService) {}
+  
+  findByEmail(email: string) {
+    return this.prisma.user.findUnique({ where: { email } });
+  }
+}
+```
+
+### Passport JWT + Argon2
+- Access token: short-lived (1h), in Authorization header
+- Refresh token: long-lived (7d), hashed with Argon2 in DB
+- Use `@nestjs/passport` with `passport-jwt` strategy
+
+### nestjs-zod
+- Validation pipe: `app.useGlobalPipes(new ZodValidationPipe())`
+- DTOs extend Zod schemas from `@cortex/shared`
+- Swagger integration via `@asteasolutions/zod-to-openapi`
+
+### Throttler + Redis
+```typescript
+ThrottlerModule.forRoot({
+  throttlers: [{ ttl: 60000, limit: 10 }],
+  storage: new ThrottlerStorageRedisService(new Redis({ host, port })),
+})
+```
+
+### Other Backend
+- **helmet**: Security headers, `app.use(helmet())`
+- **@nestjs/swagger**: Auto-generate API docs at `/api`
+- **@nestjs/axios**: HTTP client for service-to-service calls
+- **cookie-parser**: Parse cookies for refresh token flow
+
+## Shared Package (@cortex/shared)
+
+### Zod Schemas
+```typescript
+// Always import from shared, not define locally
+import { loginSchema, registerSchema, LoginDtoType } from '@cortex/shared';
+```
+
+### Constants
+```typescript
+import { AppErrors, ApiRoutes } from '@cortex/shared';
+// AppErrors.AUTH.INVALID_CREDENTIALS
+// ApiRoutes.AUTH.LOGIN
+```
+
+## Code Style
+
+- TypeScript strict mode enabled
+- Prefer `const` over `let`
+- Use async/await, not callbacks
+- Error handling: throw NestJS exceptions (`UnauthorizedException`, etc.)
+- Logging: use `Logger` from `@nestjs/common`
+
+## File Structure Conventions
+
+```
+src/
+├── app/              # Next.js routes (client)
+├── components/       # React components
+├── services/         # API clients, business logic
+├── modules/          # NestJS modules (backend)
+│   └── auth/
+│       ├── auth.module.ts
+│       ├── auth.controller.ts
+│       ├── auth.service.ts
+│       └── dto/
+└── common/           # Shared utilities per service
+    ├── guards/
+    ├── filters/
+    └── interceptors/
+```
+
+---
+
+## Original Frontend Instructions
+
 - Stack: Next.js 16 (App Router) with React 19, Tailwind CSS v4, TypeScript, next-themes, and React Compiler enabled in `next.config.ts`.
 - Entrypoint layout: `src/app/layout.tsx` loads Montserrat via `next/font`, wraps children in the custom `ThemeProvider`, and exposes metadata (title/description). Keep the `html` tag `suppressHydrationWarning` and preserve the theme wrapper when adding pages.
 - Theming: `src/components/provider/themeProvider.component.tsx` is a thin `next-themes` wrapper; default theme is `purple` with allowed themes `light`, `dark`, `purple`. Use `className="bg-background text-foreground ..."` style tokens; they map to CSS variables defined per theme in `src/app/globals.css`.

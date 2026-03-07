@@ -1,14 +1,7 @@
-import {
-  Body,
-  Controller,
-  HttpException,
-  Logger,
-  Post,
-  Res,
-  UsePipes,
-} from '@nestjs/common';
+import { Body, Controller, Post, Req, Res, UsePipes } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
+import { ProxyService } from '../../common/services/proxy.service';
 import {
   AuthResponseDto,
   LoginDto,
@@ -17,17 +10,16 @@ import {
 import { firstValueFrom } from 'rxjs';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { ApiResponse } from '@nestjs/swagger';
-import axios, { AxiosError } from 'axios';
 import type { Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
-  private readonly logger = new Logger(AuthController.name);
   private readonly authServiceUrl: string;
 
   constructor(
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
+    private readonly proxyService: ProxyService,
   ) {
     this.authServiceUrl =
       this.configService.get<string>('AUTH_SERVICE_URL') ??
@@ -50,34 +42,27 @@ export class AuthController {
   async login(
     @Body() loginDto: LoginDto,
     @Res({ passthrough: true }) res: Response,
+    @Req() req: Request & { correlationID?: string },
   ): Promise<AuthResponseDto> {
-    try {
-      const authResponse = await firstValueFrom(
-        this.httpService.post<AuthResponseDto>(
-          `${this.authServiceUrl}/auth/login`,
-          loginDto,
+    const correlationId =
+      req.correlationID ||
+      (req.headers['x-correlation-id'] as string | undefined);
+    return this.proxyService.forwardRequest<AuthResponseDto>(
+      () =>
+        firstValueFrom(
+          this.httpService.post<AuthResponseDto>(
+            `${this.authServiceUrl}/auth/login`,
+            loginDto,
+            {
+              headers: {
+                ...(correlationId ? { 'X-Correlation-ID': correlationId } : {}),
+              },
+            },
+          ),
         ),
-      );
-      this.forwardSetCookieHeaders(authResponse.headers['set-cookie'], res);
-      return authResponse.data;
-    } catch (error: unknown) {
-      if (axios.isAxiosError(error)) {
-        const axiosError: AxiosError = error;
-        const message = axiosError.message || 'Auth service is unavailable';
-        this.logger.error(`AuthService request failed: ${message}`);
-
-        if (axiosError.response) {
-          throw new HttpException(
-            axiosError.response.data || message,
-            axiosError.response.status || 500,
-          );
-        }
-
-        throw new HttpException(message, 503);
-      }
-
-      throw new HttpException('Unexpected auth gateway error', 500);
-    }
+      res,
+      { forwardSetCookie: true, logCorrelationId: correlationId },
+    );
   }
 
   @Post('register')
@@ -93,47 +78,26 @@ export class AuthController {
   async register(
     @Body() registerDto: RegisterDto,
     @Res({ passthrough: true }) res: Response,
+    @Req() req: Request & { correlationID?: string },
   ): Promise<AuthResponseDto> {
-    try {
-      const authResponse = await firstValueFrom(
-        this.httpService.post<AuthResponseDto>(
-          `${this.authServiceUrl}/auth/register`,
-          registerDto,
+    const correlationId =
+      req.correlationID ||
+      (req.headers['x-correlation-id'] as string | undefined);
+    return this.proxyService.forwardRequest<AuthResponseDto>(
+      () =>
+        firstValueFrom(
+          this.httpService.post<AuthResponseDto>(
+            `${this.authServiceUrl}/auth/register`,
+            registerDto,
+            {
+              headers: {
+                ...(correlationId ? { 'X-Correlation-ID': correlationId } : {}),
+              },
+            },
+          ),
         ),
-      );
-      this.forwardSetCookieHeaders(authResponse.headers['set-cookie'], res);
-      return authResponse.data;
-    } catch (error: unknown) {
-      if (axios.isAxiosError(error)) {
-        const axiosError: AxiosError = error;
-        const message = axiosError.message || 'Auth service is unavailable';
-        this.logger.error(`AuthService request failed: ${message}`);
-
-        if (axiosError.response) {
-          throw new HttpException(
-            axiosError.response.data || message,
-            axiosError.response.status || 500,
-          );
-        }
-
-        throw new HttpException(message, 503);
-      }
-
-      throw new HttpException('Unexpected auth gateway error', 500);
-    }
-  }
-
-  private forwardSetCookieHeaders(
-    setCookieHeader: string[] | string | undefined,
-    res: Response,
-  ): void {
-    if (Array.isArray(setCookieHeader) && setCookieHeader.length > 0) {
-      res.setHeader('Set-Cookie', setCookieHeader);
-      return;
-    }
-
-    if (typeof setCookieHeader === 'string' && setCookieHeader.length > 0) {
-      res.setHeader('Set-Cookie', [setCookieHeader]);
-    }
+      res,
+      { forwardSetCookie: true, logCorrelationId: correlationId },
+    );
   }
 }

@@ -34,7 +34,7 @@ Monorepo with microservices architecture using Turborepo:
 | client | 3000 | Next.js frontend |
 | gateway | 3001 | API Gateway, routes requests |
 | auth | 3002 | Authentication, JWT tokens |
-| report-service | 3003 | Report management, templates stored in S3, generation via SQS + Lambda |
+
 
 ## Tech Stack
 
@@ -55,7 +55,7 @@ cortexai-monorep/
 ├── client/           # Next.js frontend
 ├── gateway/          # API Gateway
 ├── auth/             # Auth microservice
-├── report-service/   # Reports microservice
+
 ├── shared/           # Shared types, schemas, constants
 ├── backend-common/   # Shared backend utilities
 └── docker-compose.yaml
@@ -106,17 +106,42 @@ docker-compose up db redis -d
 
 #### 3. Environment Variables
 
-Create `.env` files in `auth/` and `gateway/`:
+
+Create `.env` files в `auth/` і `gateway/`:
+
 
 ```env
 # auth/.env
 DATABASE_URL="postgresql://postgres:admin@localhost:5432/cortexai-users-db"
 JWT_ACCESS_SECRET="your-access-secret"
 JWT_REFRESH_SECRET="your-refresh-secret"
+SERVICE_NAME="auth-service"
+PORT=3002
+CORS_ORIGINS="http://localhost:3000"
+HTTP_ONLY=true
+SECURE=false
 
 # gateway/.env
 AUTH_SERVICE_URL="http://localhost:3002"
+SERVICE_NAME="gateway-service"
+PORT=3001
+CORS_ORIGINS="http://localhost:3000"
+
+
 ```
+
+**Environment Variable Descriptions:**
+
+- `SERVICE_NAME` — унікальна назва сервісу (для логування, моніторингу, трасування).
+- `PORT` — порт, на якому стартує сервіс (за замовчуванням: client 3000, gateway 3001, auth 3002).
+- `CORS_ORIGINS` — список дозволених CORS-оригінів, через кому (наприклад: `CORS_ORIGINS="http://localhost:3000,http://localhost:3001"`).
+- `DATABASE_URL` — підключення до Postgres (auth).
+- `AUTH_SERVICE_URL` — URL до auth-сервісу (для gateway).
+- `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET` — секрети для JWT (auth).
+- `HTTP_ONLY` — чи ставити httpOnly cookies (auth, true/false).
+- `SECURE` — чи ставити secure cookies (auth, true/false).
+
+> **Note:** Значення змінних можна змінювати під свої потреби. Всі сервіси автоматично підтягують .env через NestJS ConfigModule та dotenv.
 
 #### 4. Run Migrations
 

@@ -74,6 +74,20 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+  db_user_test:
+    image: postgres:15-alpine
+    container_name: cortexai-users-test-db
+    ports:
+      - "5434:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: cortexai-users-test-db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   db_reports:
     image: postgres:15-alpine

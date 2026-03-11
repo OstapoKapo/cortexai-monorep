@@ -3,12 +3,18 @@
 import "dotenv/config";
 import { defineConfig } from "prisma/config";
 
+// Use DATABASE_URL_SQLITE for test, DATABASE_URL_PG for dev/prod
+const isTest = process.env.NODE_ENV === 'test';
+const url = isTest
+  ? process.env.DATABASE_URL_SQLITE || process.env.DATABASE_URL
+  : process.env.DATABASE_URL_PG || process.env.DATABASE_URL;
+
 export default defineConfig({
   schema: "prisma/schema.prisma",
   migrations: {
     path: "prisma/migrations",
   },
   datasource: {
-    url: process.env["DATABASE_URL"],
+    url,
   },
 });

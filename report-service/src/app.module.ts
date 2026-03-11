@@ -2,7 +2,10 @@ import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ReportsModule } from './modules/reports/reports.module';
 import { S3Module } from './modules/s3/s3.module';
-import { CorrelationIDMiddleware } from '@cortex/backend-common';
+import {
+  CorrelationIDMiddleware,
+  SecretKeyMiddleware,
+} from '@cortex/backend-common';
 import {
   ThrottlerGuard,
   ThrottlerModule,
@@ -24,14 +27,18 @@ import { TemplatesModule } from './modules/templates/templates.module';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService): ThrottlerModuleOptions => {
+        const defaultTtl = Number(
+          configService.get<string>('THROTTLE_TTL') ?? '60',
+        );
+        const defaultLimit = Number(
+          configService.get<string>('THROTTLE_LIMIT') ?? '10',
+        );
         const options: ThrottlerModuleOptions = {
           throttlers: [
             {
               name: 'default',
-              ttl: Number(configService.get<string>('THROTTLE_TTL') ?? '60'),
-              limit: Number(
-                configService.get<string>('THROTTLE_LIMIT') ?? '100',
-              ),
+              ttl: defaultTtl * 1000,
+              limit: defaultLimit,
             },
           ],
           errorMessage: 'Too many requests, please try again later.',
@@ -67,6 +74,9 @@ export class AppModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(CorrelationIDMiddleware)
+      .forRoutes({ path: '*', method: RequestMethod.ALL });
+    consumer
+      .apply(SecretKeyMiddleware)
       .forRoutes({ path: '*', method: RequestMethod.ALL });
   }
 }

@@ -2,6 +2,7 @@ import { Body, Controller, Post, Req, Res, UsePipes } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { ProxyService } from '../../common/services/proxy.service';
+import type { AuthenticatedRequest } from '../../common/services/proxy.service';
 import {
   AuthResponseDto,
   LoginDto,
@@ -42,26 +43,20 @@ export class AuthController {
   async login(
     @Body() loginDto: LoginDto,
     @Res({ passthrough: true }) res: Response,
-    @Req() req: Request & { correlationID?: string },
+    @Req() req: AuthenticatedRequest,
   ): Promise<AuthResponseDto> {
-    const correlationId =
-      req.correlationID ||
-      (req.headers['x-correlation-id'] as string | undefined);
     return this.proxyService.forwardRequest<AuthResponseDto>(
-      () =>
+      req,
+      res,
+      (headers) =>
         firstValueFrom(
           this.httpService.post<AuthResponseDto>(
             `${this.authServiceUrl}/auth/login`,
             loginDto,
-            {
-              headers: {
-                ...(correlationId ? { 'X-Correlation-ID': correlationId } : {}),
-              },
-            },
+            { headers },
           ),
         ),
-      res,
-      { forwardSetCookie: true, logCorrelationId: correlationId },
+      { forwardSetCookie: true },
     );
   }
 
@@ -78,26 +73,20 @@ export class AuthController {
   async register(
     @Body() registerDto: RegisterDto,
     @Res({ passthrough: true }) res: Response,
-    @Req() req: Request & { correlationID?: string },
+    @Req() req: AuthenticatedRequest,
   ): Promise<AuthResponseDto> {
-    const correlationId =
-      req.correlationID ||
-      (req.headers['x-correlation-id'] as string | undefined);
     return this.proxyService.forwardRequest<AuthResponseDto>(
-      () =>
+      req,
+      res,
+      (headers) =>
         firstValueFrom(
-          this.httpService.post<AuthResponseDto>(
+          this.httpService.post(
             `${this.authServiceUrl}/auth/register`,
             registerDto,
-            {
-              headers: {
-                ...(correlationId ? { 'X-Correlation-ID': correlationId } : {}),
-              },
-            },
+            { headers },
           ),
         ),
-      res,
-      { forwardSetCookie: true, logCorrelationId: correlationId },
+      { forwardSetCookie: true },
     );
   }
 }

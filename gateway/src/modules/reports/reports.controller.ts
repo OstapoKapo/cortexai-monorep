@@ -8,13 +8,15 @@ import {
   ApiConsumes,
   ApiResponse,
 } from '@nestjs/swagger';
-import type { Request, Response } from 'express';
+import type { Response } from 'express';
 import { UploadResponseDto } from 'src/common/dto/reports.dto';
 import { AtGuard } from 'src/common/guards/at.guard';
+import type { AuthenticatedRequest } from 'src/common/services/proxy.service';
 
 @Controller('reports')
 export class ReportsController {
   private readonly reportsUrl: string;
+
   constructor(
     private readonly configService: ConfigService,
     private readonly httpService: HttpService,
@@ -49,30 +51,16 @@ export class ReportsController {
     type: UploadResponseDto,
   })
   @ApiResponse({ status: 400, description: 'Bad Request.' })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized. Invalid credentials.',
-  })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @ApiResponse({ status: 500, description: 'Internal Server Error.' })
   async createReportTemplate(
-    @Req()
-    req: Request & {
-      user: { userId: string; email: string };
-      correlationID?: string;
-    },
+    @Req() req: AuthenticatedRequest,
     @Res() res: Response,
   ): Promise<void> {
-    const userId = req.user.userId;
-    let correlationId = req.correlationID || req.headers['x-correlation-id'];
-    if (Array.isArray(correlationId)) correlationId = correlationId[0];
-    const headers: Record<string, string | string[] | undefined> = {
-      ...req.headers,
-    };
-    headers['X-User-Id'] = userId;
-    if (correlationId) headers['X-Correlation-ID'] = correlationId;
-
     await this.proxyService.forwardRequest(
-      () =>
+      req,
+      res,
+      (headers) =>
         this.httpService.axiosRef({
           method: 'POST',
           url: `${this.reportsUrl}/templates/template`,
@@ -80,8 +68,10 @@ export class ReportsController {
           responseType: 'stream',
           headers,
         }),
-      res,
-      { forwardSetCookie: false, logCorrelationId: correlationId },
+      {
+        forwardSetCookie: false,
+        forwardUserId: true,
+      },
     );
   }
 }

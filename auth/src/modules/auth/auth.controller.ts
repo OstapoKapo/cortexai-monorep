@@ -5,7 +5,7 @@ import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { AuthService } from './auth.service';
 import { Request, Response } from 'express';
-import { Throttle } from '@nestjs/throttler';
+// import { Throttle } from '@nestjs/throttler';
 
 @Controller('auth')
 export class AuthController {
@@ -19,10 +19,6 @@ export class AuthController {
   @ApiResponse({ status: 409, description: 'Conflict. User already exists.' })
   @ApiResponse({ status: 500, description: 'Internal Server Error.' })
   @UsePipes(ZodValidationPipe)
-  @Throttle({
-    short: { limit: 100, ttl: 60000 },
-    long: { limit: 300, ttl: 60000 },
-  })
   @Post('register')
   async register(
     @Body() dto: RegisterDto,
@@ -43,10 +39,6 @@ export class AuthController {
   })
   @ApiResponse({ status: 500, description: 'Internal Server Error.' })
   @UsePipes(ZodValidationPipe)
-  @Throttle({
-    short: { limit: 100, ttl: 60000 },
-    long: { limit: 300, ttl: 60000 },
-  })
   @Post('login')
   async login(
     @Body() dto: LoginDto,

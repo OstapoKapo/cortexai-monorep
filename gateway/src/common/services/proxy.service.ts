@@ -1,24 +1,56 @@
+import { randomBytes } from 'crypto';
 import { Injectable, Logger, HttpException } from '@nestjs/common';
 import axios, { AxiosResponse } from 'axios';
-import { Response } from 'express';
+import { Response, Request } from 'express';
 
+export type AuthenticatedRequest = Request & {
+  correlationID: string;
+  user?: { userId: string; email: string };
+};
 @Injectable()
 export class ProxyService {
   private readonly logger = new Logger(ProxyService.name);
+  private readonly internalSecret: string;
+
+  constructor() {
+    this.internalSecret =
+      process.env.INTERNAL_SECRET_KEY || randomBytes(32).toString('hex');
+  }
 
   async forwardRequest<T = unknown>(
-    axiosRequest: () => Promise<AxiosResponse<T>>,
+    req: AuthenticatedRequest,
     res: Response,
+    axiosRequest: (
+      headers: Record<string, string>,
+    ) => Promise<AxiosResponse<T>>,
     options?: {
       forwardSetCookie?: boolean;
-      logCorrelationId?: string;
+      forwardUserId?: boolean;
+      extraHeaders?: Record<string, string>;
     },
   ): Promise<T> {
+    const correlationId = req.correlationID;
+
     try {
-      const response = await axiosRequest();
+      const headers: Record<string, string> = {
+        'X-Internal-Secret': this.internalSecret,
+        'X-Correlation-ID': correlationId,
+      };
+
+      if (options?.forwardUserId && req.user?.userId) {
+        headers['X-User-Id'] = req.user.userId;
+      }
+
+      if (options?.extraHeaders) {
+        Object.assign(headers, options.extraHeaders);
+      }
+
+      const response = await axiosRequest(headers);
+
       if (options?.forwardSetCookie && response.headers['set-cookie']) {
         this.forwardSetCookieHeaders(response.headers['set-cookie'], res);
       }
+
       return response.data;
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
@@ -26,7 +58,7 @@ export class ProxyService {
         const message = axiosError.message || 'Downstream service unavailable';
         this.logger.error(
           `Proxy error: ${message}` +
-            (options?.logCorrelationId ? ` [${options.logCorrelationId}]` : ''),
+            (correlationId ? ` [${correlationId}]` : ''),
         );
         if (axiosError.response) {
           throw new HttpException(

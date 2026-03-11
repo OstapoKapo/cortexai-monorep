@@ -1,4 +1,6 @@
 import { Module, MiddlewareConsumer, RequestMethod } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard } from '@nestjs/throttler';
 import { CorrelationIDMiddleware } from '@cortex/backend-common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ThrottlerModule, ThrottlerModuleOptions } from '@nestjs/throttler';
@@ -32,12 +34,12 @@ import { ReportsModule } from './modules/reports/reports.module';
           throttlers: [
             {
               name: 'short',
-              ttl: shortTtl,
+              ttl: shortTtl * 1000,
               limit: shortLimit,
             },
             {
               name: 'long',
-              ttl: longTtl,
+              ttl: longTtl * 1000,
               limit: longLimit,
             },
           ],
@@ -61,6 +63,12 @@ import { ReportsModule } from './modules/reports/reports.module';
         return options;
       },
     }),
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
   ],
 })
 export class AppModule {

@@ -133,10 +133,7 @@ export class AuthController {
       res,
       (headers) =>
         firstValueFrom(
-          this.httpService.get(
-            `${this.authServiceUrl}/auth/me`,
-            { headers },
-          ),
+          this.httpService.get(`${this.authServiceUrl}/auth/me`, { headers }),
         ),
       { forwardSetCookie: true, forwardUserId: true },
     );

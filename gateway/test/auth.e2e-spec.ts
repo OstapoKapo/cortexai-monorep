@@ -130,26 +130,27 @@ describe('AuthController (e2e, gateway+auth)', () => {
       })
       .expect(201);
     expect(registerRes.body).toBeDefined();
-   const cookies = registerRes.headers['set-cookie'];
+    const cookies = registerRes.headers['set-cookie'];
 
-  const logoutRes = await request(app.getHttpServer())
-    .post('/auth/logout')
-    .set('Cookie', cookies)
-    .expect(200);
+    const logoutRes = await request(app.getHttpServer())
+      .post('/auth/logout')
+      .set('Cookie', cookies)
+      .expect(200);
 
+    const setCookies = logoutRes.headers['set-cookie'] as unknown as string[];
+    expect(setCookies).toBeDefined();
 
-  const setCookies = logoutRes.headers['set-cookie'] as unknown as string[];
-  expect(setCookies).toBeDefined();
+    const accessTokenCookie = setCookies.find((c) => c.includes('accessToken'));
+    expect(accessTokenCookie).toBeDefined();
 
-  const accessTokenCookie = setCookies.find(c => c.includes('accessToken'));
-  expect(accessTokenCookie).toBeDefined();
-  
-  expect(accessTokenCookie).toMatch(/Max-Age=0|Expires=Thu, 01 Jan 1970/i);
+    expect(accessTokenCookie).toMatch(/Max-Age=0|Expires=Thu, 01 Jan 1970/i);
 
-  const refreshTokenCookie = setCookies.find(c => c.includes('refreshToken'));
-  expect(refreshTokenCookie).toBeDefined();
-  expect(refreshTokenCookie).toMatch(/Max-Age=0|Expires=Thu, 01 Jan 1970/i);
-});
+    const refreshTokenCookie = setCookies.find((c) =>
+      c.includes('refreshToken'),
+    );
+    expect(refreshTokenCookie).toBeDefined();
+    expect(refreshTokenCookie).toMatch(/Max-Age=0|Expires=Thu, 01 Jan 1970/i);
+  });
 
   it('/auth/me (GET) should return user info for logged in user', async () => {
     const registerRes = await request(app.getHttpServer())

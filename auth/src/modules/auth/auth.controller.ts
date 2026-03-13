@@ -65,7 +65,10 @@ export class AuthController {
   @UseGuards(AtGuard)
   @ApiOperation({ summary: 'Logout a user' })
   @ApiResponse({ status: 200, description: 'User logged out successfully.' })
-  @ApiResponse({ status: 401, description: 'Unauthorized. User not logged in.' })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized. User not logged in.',
+  })
   @ApiResponse({ status: 500, description: 'Internal Server Error.' })
   @Post('logout')
   @HttpCode(200)

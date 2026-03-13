@@ -1,42 +1,187 @@
-# 🧠 CortexAI: Intelligent RAG Admin Platform
+# CortexAI
 
-**CortexAI** is an enterprise-grade analytics dashboard and reporting platform powered by **Retrieval-Augmented Generation (RAG)**. It leverages a modern monorepo architecture to deliver real-time AI insights, automated reporting, and scalable background processing.
+Automated report generation platform for students. Stop wasting time on formatting — focus on what matters.
 
-![CI Status](https://github.com/OstapoKapo/cortexai-monorep/actions/workflows/ci.yml/badge.svg)
-![Architecture](https://img.shields.io/badge/Architecture-Event--Driven-blue)
-![Stack](https://img.shields.io/badge/Stack-Next.js_|_NestJS_|_AWS-black)
+## About
 
-## 📖 About The Project
+CortexAI helps students generate properly formatted academic reports automatically. Upload your data, select a template, and get a ready-to-submit document.
 
-CortexAI is designed to solve the problem of complex data interpretation. It acts as an intelligent layer between raw data and administrative decision-making.
+## Architecture
 
-**Key Capabilities:**
-* **RAG-Powered Q&A:** Administrators can ask natural language questions about their data and receive accurate answers based on indexed reports.
-* **Automated Reporting:** Background workers generate heavy analytical reports without freezing the UI.
-* **Event-Driven Architecture:** Uses RabbitMQ to handle high loads and asynchronous tasks (e.g., AI inference, PDF generation).
-* **Serverless Scalability:** Resource-intensive tasks are offloaded to **AWS Lambda**.
+Monorepo with microservices architecture using Turborepo:
 
-## 🏗 System Architecture
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│   Client    │────▶│   Gateway   │────▶│    Auth     │
+│  (Next.js)  │     │  (NestJS)   │     │  (NestJS)   │
+└─────────────┘     └──────┬──────┘     └─────────────┘
+                          │
+                          ▼
+                   ┌─────────────┐     ┌─────────────┐
+                   │   Reports   │────▶│     SQS     │
+                   │  (NestJS)   │     └──────┬──────┘
+                   └──────┬──────┘            │
+                          │                   ▼
+                          ▼            ┌─────────────┐
+                   ┌─────────────┐     │   Lambda    │
+                   │     S3      │◀────│ (Generate)  │
+                   │ (Templates) │     └─────────────┘
+                   └─────────────┘
+```
 
-The project follows a **Monorepo** structure managed by NPM Workspaces:
+| Service | Port | Description |
+|---------|------|-------------|
+| client | 3000 | Next.js frontend |
+| gateway | 3001 | API Gateway, routes requests |
+| auth | 3002 | Authentication, JWT tokens |
 
-```mermaid
-graph TD
-    Client[Next.js Client] -->|HTTP/REST| API[NestJS API Gateway]
-    API -->|Produce Events| MQ[RabbitMQ]
-    MQ -->|Consume Events| Workers[NestJS Workers]
-    Workers -->|Invoke| Lambda[AWS Lambda]
-    Workers -->|Read/Write| DB[(PostgreSQL)]
-    Workers -->|Vector Search| VectorDB[(Vector Store)]
-🛠 Tech Stack🖥 Client (Frontend)Framework: Next.js 16 (App Router)Language: TypeScriptStyling: Tailwind CSS v4, Shadcn/UIState: React Query, ZustandBuild Tool: Turbopack⚙️ Server (Backend & Microservices)Core Framework: NestJS (Modular Architecture)Messaging: RabbitMQ (Microservices communication)Database: PostgreSQL (Primary storage)ORM: TypeORM / PrismaValidation: Zod (Shared DTOs with Client)☁️ Cloud & AI (Infrastructure)Compute: AWS Lambda (Serverless functions)AI Integration: OpenAI API / LangChain (RAG Pipeline)Storage: AWS S3 (Report artifacts)DevOps: Docker, Docker Compose, GitHub Actions📂 Project StructurePlaintextCortexAI/
-├── client/          # Next.js Dashboard (Admin Panel)
-├── back/            # NestJS API Gateway & Workers
-├── shared/          # Shared Types, Zod Schemas, Utils
-├── docker-compose.yml # Local infra (Postgres, RabbitMQ)
-└── .github/         # CI/CD Workflows
-🚀 Getting StartedPrerequisitesNode.js (v20+)Docker & Docker Compose (for DB and RabbitMQ)1. Clone & InstallBashgit clone [https://github.com/OstapoKapo/cortexai-monorep.git](https://github.com/OstapoKapo/cortexai-monorep.git)
+
+## Tech Stack
+
+**Frontend:** Next.js 16, React 19, Tailwind CSS v4, TypeScript
+
+**Backend:** NestJS, Prisma, PostgreSQL, Redis
+
+**Shared:** Zod schemas, TypeScript types (shared between client & server)
+
+**Infrastructure:** Docker, Turborepo
+
+**AWS:** S3 (template storage), SQS (job queue), Lambda (report generation)
+
+## Project Structure
+
+```
+cortexai-monorep/
+├── client/           # Next.js frontend
+├── gateway/          # API Gateway
+├── auth/             # Auth microservice
+
+├── shared/           # Shared types, schemas, constants
+├── backend-common/   # Shared backend utilities
+└── docker-compose.yaml
+```
+
+## Quick Start
+
+### Prerequisites
+
+- Docker & Docker Compose
+- Node.js 20+ (for local development)
+
+### Option 1: Docker (Recommended)
+
+Run the entire stack with one command:
+
+```bash
+git clone https://github.com/OstapoKapo/cortexai-monorep.git
+cd cortexai-monorep
+
+# Start all services
+docker-compose up -d
+
+# Run database migrations
+docker-compose exec auth npx prisma migrate deploy
+```
+
+Access:
+- Client: http://localhost:3000
+- Gateway API: http://localhost:3001
+- Swagger Docs: http://localhost:3001/api
+
+### Option 2: Local Development
+
+#### 1. Clone & Install
+
+```bash
+git clone https://github.com/OstapoKapo/cortexai-monorep.git
 cd cortexai-monorep
 npm install
-2. Infrastructure SetupStart PostgreSQL and RabbitMQ locally using Docker:Bashdocker-compose up -d
-3. Environment VariablesCreate .env files in client/ and back/ based on .env.example.Ensure you configure:DATABASE_URLRABBITMQ_URIAWS_ACCESS_KEY_ID (for Lambda/S3)OPENAI_API_KEY (for RAG)4. Run Development ModeStart the entire stack (Client + Server):Bashnpm run dev
-Client: http://localhost:3000API: http://localhost:3001RabbitMQ Dashboard: http://localhost:15672🧪 ScriptsCommandDescriptionnpm run buildBuild client, server, and shared packagesnpm run lintRun ESLint across the monoreponpm run checkFull type-check and build verificationnpm testRun unit tests🤝 ContributionThis project uses Husky for pre-commit checks.Branching: Use feature branches (feature/rag-pipeline).Commits: Follow Conventional Commits (feat: add rabbitmq consumer).Author: @OstapoKapo
+```
+
+#### 2. Start Infrastructure
+
+```bash
+docker-compose up db redis -d
+```
+
+#### 3. Environment Variables
+
+
+Create `.env` files в `auth/` і `gateway/`:
+
+
+```env
+# auth/.env
+DATABASE_URL="postgresql://postgres:admin@localhost:5432/cortexai-users-db"
+JWT_ACCESS_SECRET="your-access-secret"
+JWT_REFRESH_SECRET="your-refresh-secret"
+SERVICE_NAME="auth-service"
+PORT=3002
+CORS_ORIGINS="http://localhost:3000"
+HTTP_ONLY=true
+SECURE=false
+
+# gateway/.env
+AUTH_SERVICE_URL="http://localhost:3002"
+SERVICE_NAME="gateway-service"
+PORT=3001
+CORS_ORIGINS="http://localhost:3000"
+
+
+```
+
+**Environment Variable Descriptions:**
+
+- `SERVICE_NAME` — унікальна назва сервісу (для логування, моніторингу, трасування).
+- `PORT` — порт, на якому стартує сервіс (за замовчуванням: client 3000, gateway 3001, auth 3002).
+- `CORS_ORIGINS` — список дозволених CORS-оригінів, через кому (наприклад: `CORS_ORIGINS="http://localhost:3000,http://localhost:3001"`).
+- `DATABASE_URL` — підключення до Postgres (auth).
+- `AUTH_SERVICE_URL` — URL до auth-сервісу (для gateway).
+- `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET` — секрети для JWT (auth).
+- `HTTP_ONLY` — чи ставити httpOnly cookies (auth, true/false).
+- `SECURE` — чи ставити secure cookies (auth, true/false).
+
+> **Note:** Значення змінних можна змінювати під свої потреби. Всі сервіси автоматично підтягують .env через NestJS ConfigModule та dotenv.
+
+#### 4. Run Migrations
+
+```bash
+cd auth
+npx prisma migrate dev
+npx prisma generate
+```
+
+#### 5. Start Dev Servers
+
+```bash
+# From root
+npm run dev
+```
+
+- Client: http://localhost:3000
+- Gateway: http://localhost:3001
+- Auth: http://localhost:3002
+
+## Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start all services in dev mode |
+| `npm run build` | Build all packages |
+| `npm run lint` | Lint all packages |
+
+## API Endpoints
+
+### Auth
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/auth/register` | Register new user |
+| POST | `/auth/login` | Login |
+| POST | `/auth/logout` | Logout |
+| POST | `/auth/refresh-token` | Refresh tokens |
+| GET | `/auth/me` | Get current user |
+
+## License
+
+MIT

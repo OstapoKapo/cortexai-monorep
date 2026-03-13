@@ -5,9 +5,11 @@
   "packageManager": "npm@11.6.0",
   "workspaces": [
     "client",
-    "back",
+    "auth",
     "shared",
-    "backend-common"
+    "backend-common",
+    "report-service",
+    "gateway"
   ],
   "scripts": {
     "dev": "turbo dev",

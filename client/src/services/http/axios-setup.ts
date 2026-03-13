@@ -2,7 +2,8 @@ import axios, { AxiosError, AxiosResponse } from 'axios';
 import toast from 'react-hot-toast';
 import { ApiErrorResponse } from '../types';
 
-const DEFAULT_API_URL = process.env.NEXT_PUBLIC_API_URL || '/api/proxy';
+// Default to proxy for CSR requests with cookies
+const DEFAULT_API_URL = '/api/proxy';
 
 export const mainAxios = axios.create({
     baseURL: DEFAULT_API_URL,

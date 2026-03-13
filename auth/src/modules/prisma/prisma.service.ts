@@ -1,0 +1,37 @@
+import { PrismaClient } from '@prisma/auth-client';
+import { PrismaPg } from '@prisma/adapter-pg';
+import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Pool } from 'pg';
+
+@Injectable()
+export class PrismaService extends PrismaClient implements OnModuleInit {
+  private static resolveDatabaseUrl(): string {
+    const databaseUrl = process.env.DATABASE_URL;
+
+    if (!databaseUrl) {
+      throw new Error(
+        'DATABASE_URL environment variable is required but not set',
+      );
+    }
+
+    try {
+      new URL(databaseUrl);
+      return databaseUrl;
+    } catch {
+      throw new Error('DATABASE_URL environment variable is not a valid URL');
+    }
+  }
+
+  constructor() {
+    const pool = new Pool({
+      connectionString: PrismaService.resolveDatabaseUrl(),
+    });
+
+    const adapter = new PrismaPg(pool);
+
+    super({ adapter });
+  }
+  async onModuleInit(): Promise<void> {
+    await this.$connect();
+  }
+}

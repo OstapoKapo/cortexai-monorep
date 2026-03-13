@@ -1,58 +1,136 @@
 
 services:
-  # --- 1. Backend (твій NestJS) ---
-  # backend:
-  #   build:
-  #     context: ./back # Вказуємо шлях до папки 'back'
-  #     # dockerfile: Dockerfile (можна не вказувати, якщо він так і називається)
-  #   container_name: cortexai-backend
-  #   ports:
-  #     - "8000:8000" # Порт для NestJS
-  #   depends_on:
-  #     - db
-  #     - redis
-  #   env_file:
-  #     - ./back/.env.docker # Шлях до .env файлу тепер відносно кореня
-  #   environment:
-  #     # Назви 'db' та 'redis' працюватимуть, бо вони в одній мережі
-  #     DATABASE_URL: postgres://postgres:admin@db:5432/cortexai-users-db
-  #     REDIS_HOST: redis
-  #     REDIS_PORT: 6379
-  #   restart: always
+  # --- Application Services ---
+  client:
+    build:
+      context: .
+      dockerfile: client/Dockerfile
+      args:
+        - NEXT_PUBLIC_GATEWAY_URL=http://localhost:3001
+    container_name: cortexai-client
+    ports:
+      - "3000:3000"
+    environment:
+      - NEST_INTERNAL_URL=http://gateway:3001
+    depends_on:
+      - gateway
+    restart: unless-stopped
 
-  # --- 2. Frontend (твій React/Next) ---
-  # frontend:
-  #   build:
-  #     context: ./front # Вказуємо шлях до папки 'front'
-  #   container_name: cortexai-frontend
-  #   ports:
-  #     - "3000:3000" # Порт для React/Next
-  #   restart: always
-  #   # Можна додати, якщо фронту потрібен бек під час збірки (зазвичай ні)
-  #   # depends_on:
-  #   #   - backend 
+  gateway:
+    build:
+      context: .
+      dockerfile: gateway/Dockerfile
+    container_name: cortexai-gateway
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - AUTH_SERVICE_URL=http://auth:3002
+      - JWT_ACCESS_SECRET=your-super-secret-access-key-change-in-production
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - auth
+      - redis
+    restart: unless-stopped
 
-  # --- 3. База даних ---
+  auth:
+    build:
+      context: .
+      dockerfile: auth/Dockerfile
+    container_name: cortexai-auth
+    ports:
+      - "3002:3002"
+    environment:
+      - PORT=3002
+      - DATABASE_URL=postgresql://postgres:admin@db:5432/cortexai-users-db
+      - JWT_ACCESS_SECRET=your-super-secret-access-key-change-in-production
+      - JWT_REFRESH_SECRET=your-super-secret-refresh-key-change-in-production
+      - JWT_ACCESS_EXPIRES=1h
+      - JWT_REFRESH_EXPIRES=7d
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    restart: unless-stopped
+
+  # --- Infrastructure ---
   db:
     image: postgres:15-alpine
-    container_name: cortexai-users-db # Унікальне ім'я
+    container_name: cortexai-users-db
     ports:
       - "5432:5432"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: admin
-      POSTGRES_DB: cortexai-users-db # Назва БД для проекту
+      POSTGRES_DB: cortexai-users-db
     volumes:
-      - pgdata-cortexai-users:/var/lib/postgresql/data # Унікальний том
+      - pgdata-cortexai-users:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  db_user_test:
+    image: postgres:15-alpine
+    container_name: cortexai-users-test-db
+    ports:
+      - "5434:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: cortexai-users-test-db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
-  # --- 4. Редіс ---
+  db_reports:
+    image: postgres:15-alpine
+    container_name: cortexai-reports-db
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: cortexai-reports-db
+    volumes:
+      - pgdata-cortexai-reports:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   redis:
-    image: redis:7
-    container_name: cortexai-redis # Унікальне ім'я
+    image: redis:7-alpine
+    container_name: cortexai-redis
     ports:
       - "6379:6379"
-    restart: always
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    
+  localstack:
+    container_name: cortexai-localstack
+    image: localstack/localstack
+    ports:
+      - "4566:4566"
+    environment:
+      - DEBUG=${DEBUG:-0}
+      - SERVICES=s3,sqs
+      - PERSISTENCE=1
+    volumes:
+      - localstack-data:/var/lib/localstack
 
-# Оголошуємо унікальний том для даних БД
 volumes:
   pgdata-cortexai-users:
+  pgdata-cortexai-reports:
+  localstack-data:

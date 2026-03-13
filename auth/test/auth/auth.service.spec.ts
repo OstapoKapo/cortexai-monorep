@@ -131,4 +131,52 @@ describe('AuthService', () => {
       });
     });
   });
+
+  describe('refreshTokens', () => {
+    let req: any;
+    let res: any;
+    beforeEach(() => {
+      req = { cookies: { refreshToken: 'valid.refresh.token' } };
+      res = {};
+    });
+
+    it('should refresh tokens for valid refreshToken', async () => {
+      (jwtService.verify as jest.Mock) = jest.fn().mockReturnValue({ email: 'test@test.com', sub: '1' });
+      mockUsersService.getUserByEmail.mockResolvedValue({ id: '1', email: 'test@test.com', refreshToken: 'hashed' });
+      (argon2.verify as jest.Mock).mockResolvedValue(true);
+      // Не мокати приватний метод createTokens напряму, просто перевіряємо результат
+      mockUsersService.changeUserData.mockResolvedValue(true);
+
+      const result = await service.refreshTokens(req, res);
+      expect(jwtService.verify).toHaveBeenCalled();
+      expect(mockUsersService.getUserByEmail).toHaveBeenCalled();
+      expect(argon2.verify).toHaveBeenCalled();
+      expect(mockUsersService.changeUserData).toHaveBeenCalled();
+      expect(result).toHaveProperty('accessToken');
+      expect(result).toHaveProperty('newRefreshToken');
+    });
+
+    it('should throw if no refreshToken cookie', async () => {
+      req.cookies = {};
+      await expect(service.refreshTokens(req, res)).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('should throw if jwtService.verify fails', async () => {
+      (jwtService.verify as jest.Mock) = jest.fn(() => { throw new Error('bad token'); });
+      await expect(service.refreshTokens(req, res)).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('should throw if user not found', async () => {
+      (jwtService.verify as jest.Mock) = jest.fn().mockReturnValue({ email: 'test@test.com', sub: '1' });
+      mockUsersService.getUserByEmail.mockResolvedValue(null);
+      await expect(service.refreshTokens(req, res)).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('should throw if argon2.verify fails', async () => {
+      (jwtService.verify as jest.Mock) = jest.fn().mockReturnValue({ email: 'test@test.com', sub: '1' });
+      mockUsersService.getUserByEmail.mockResolvedValue({ id: '1', email: 'test@test.com', refreshToken: 'hashed' });
+      (argon2.verify as jest.Mock).mockResolvedValue(false);
+      await expect(service.refreshTokens(req, res)).rejects.toThrow(UnauthorizedException);
+    });
+  });
 });

@@ -7,6 +7,7 @@ import {
   Post,
   Req,
   Res,
+  UseGuards,
   UsePipes,
 } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
@@ -22,6 +23,7 @@ import { firstValueFrom } from 'rxjs';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { ApiResponse } from '@nestjs/swagger';
 import type { Response } from 'express';
+import { AtGuard } from '../../common/guards/at.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -101,6 +103,7 @@ export class AuthController {
     );
   }
 
+  @UseGuards(AtGuard)
   @Post('logout')
   @HttpCode(200)
   async logout(
@@ -122,6 +125,31 @@ export class AuthController {
     );
   }
 
+  @Post('refresh-token')
+  @HttpCode(HttpStatus.OK)
+  async refreshToken(
+    @Res({ passthrough: true }) res: Response,
+    @Req() req: AuthenticatedRequest,
+  ): Promise<{ message: string; refreshed: boolean }> {
+    return this.proxyService.forwardRequest<{
+      message: string;
+      refreshed: boolean;
+    }>(
+      req,
+      res,
+      (headers) =>
+        firstValueFrom(
+          this.httpService.post(
+            `${this.authServiceUrl}/auth/refresh-token`,
+            {},
+            { headers },
+          ),
+        ),
+      { forwardSetCookie: true },
+    );
+  }
+
+  @UseGuards(AtGuard)
   @Get('me')
   @HttpCode(200)
   async me(

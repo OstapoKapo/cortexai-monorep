@@ -102,6 +102,9 @@
     "moduleNameMapper": {
       "^@/(.*)$": "<rootDir>/src/$1",
       "^@cortex/shared$": "<rootDir>/../shared/index.ts"
-    }
+    },
+    "transformIgnorePatterns": [
+      "/node_modules/(?!(uuid)/)"
+    ] 
   }
 }

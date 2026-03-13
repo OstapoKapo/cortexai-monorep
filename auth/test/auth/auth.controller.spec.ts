@@ -11,6 +11,7 @@ describe('AuthController', () => {
   const mockAuthService = {
     register: jest.fn(),
     login: jest.fn(),
+    refreshTokens: jest.fn(),
     logout: jest.fn(),
   };
 
@@ -83,6 +84,18 @@ describe('AuthController', () => {
       expect(mockResponse.clearCookie).toHaveBeenCalledWith('accessToken');
       expect(mockResponse.clearCookie).toHaveBeenCalledWith('refreshToken', expect.any(Object));
       expect(result).toEqual({ message: 'User logged out successfully' });
+    });
+  });
+
+  describe('refreshToken', () => {
+    it('should call authService.refreshTokens and set cookies', async () => {
+      const req = { user: { userId: '123' } } as any;
+      const tokens = { accessToken: 'access.token', newRefreshToken: 'refresh.token' };
+      (mockAuthService.refreshTokens as jest.Mock) = jest.fn().mockResolvedValue(tokens);
+      const result = await controller.refreshToken(req, mockResponse);
+      expect(authService.refreshTokens).toHaveBeenCalledWith(req, mockResponse);
+      expect(mockResponse.cookie).toHaveBeenCalledTimes(2);
+      expect(result).toEqual({ message: 'Tokens refreshed successfully', refreshed: true });
     });
   });
 });

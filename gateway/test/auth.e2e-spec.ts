@@ -80,9 +80,10 @@ describe('AuthController (e2e, gateway+auth)', () => {
       .post('/auth/register')
       .send(testUser)
       .expect(201);
-    const data = (typeof res.body === 'object' && 'data' in res.body)
-      ? (res.body as { data: { message: string } }).data
-      : res.body as { message: string };
+    const data =
+      typeof res.body === 'object' && 'data' in res.body
+        ? (res.body as { data: { message: string } }).data
+        : (res.body as { message: string });
     expect(data).toHaveProperty('message');
     expect(data.message).toMatch(/registered/i);
   });
@@ -92,9 +93,10 @@ describe('AuthController (e2e, gateway+auth)', () => {
       .post('/auth/login')
       .send({ email: testUser.email, password: testUser.password })
       .expect(200);
-    const data = (typeof res.body === 'object' && 'data' in res.body)
-      ? (res.body as { data: { message: string } }).data
-      : res.body as { message: string };
+    const data =
+      typeof res.body === 'object' && 'data' in res.body
+        ? (res.body as { data: { message: string } }).data
+        : (res.body as { message: string });
     expect(data).toHaveProperty('message');
     expect(data.message).toMatch(/logged in/i);
     expect(res.headers['set-cookie']).toBeDefined();
@@ -105,5 +107,15 @@ describe('AuthController (e2e, gateway+auth)', () => {
       .post('/auth/login')
       .send({ email: testUser.email, password: 'wrongpass' })
       .expect(401);
+  });
+
+  it('/auth/login (POST) should fail with invalid X-Internal-Secret', async () => {
+    const res: SupertestResponse = await request(app.getHttpServer())
+      .post('/auth/login')
+      .set('X-Internal-Secret', 'invalid-secret')
+      .send({ email: testUser.email, password: testUser.password });
+    expect(res.status).not.toBe(200);
+    expect([401, 403]).toContain(res.status);
+    expect(typeof res.body === 'object' && 'message' in res.body).toBe(true);
   });
 });

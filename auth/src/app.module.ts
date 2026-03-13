@@ -1,9 +1,6 @@
 import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { AuthModule } from './modules/auth/auth.module';
-import {
-  CorrelationIDMiddleware,
-  SecretKeyMiddleware,
-} from '@cortex/backend-common';
+import { CorrelationIDMiddleware, SecretKeyGuard} from '@cortex/backend-common';
 import { UsersModule } from './modules/users/users.module';
 import { PrismaModule } from './modules/prisma/prisma.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -14,6 +11,7 @@ import {
 } from '@nestjs/throttler';
 import { ThrottlerStorageRedisService } from '@nest-lab/throttler-storage-redis';
 import { APP_GUARD } from '@nestjs/core';
+
 
 @Module({
   imports: [
@@ -76,15 +74,16 @@ import { APP_GUARD } from '@nestjs/core';
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
     },
+    {
+      provide: APP_GUARD,
+      useClass: SecretKeyGuard,
+    },
   ],
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(CorrelationIDMiddleware)
-      .forRoutes({ path: '*', method: RequestMethod.ALL });
-    consumer
-      .apply(SecretKeyMiddleware)
       .forRoutes({ path: '*', method: RequestMethod.ALL });
   }
 }

@@ -4,7 +4,6 @@ import { ReportsModule } from './modules/reports/reports.module';
 import { S3Module } from './modules/s3/s3.module';
 import {
   CorrelationIDMiddleware,
-  SecretKeyMiddleware,
 } from '@cortex/backend-common';
 import {
   ThrottlerGuard,
@@ -74,9 +73,6 @@ export class AppModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(CorrelationIDMiddleware)
-      .forRoutes({ path: '*', method: RequestMethod.ALL });
-    consumer
-      .apply(SecretKeyMiddleware)
       .forRoutes({ path: '*', method: RequestMethod.ALL });
   }
 }

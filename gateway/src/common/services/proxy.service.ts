@@ -38,7 +38,7 @@ export class ProxyService {
       };
 
       if (options?.forwardUserId && req.user?.userId) {
-        headers['X-User-Id'] = req.user.userId;
+       headers['X-User-Id'] = req.user.userId;
       }
 
       if (options?.extraHeaders) {

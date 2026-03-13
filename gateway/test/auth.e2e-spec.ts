@@ -29,20 +29,28 @@ describe('AuthController (e2e)', () => {
   });
 
   it('/auth/login (POST) should return 400 for empty body', async () => {
-    const res: SupertestResponse = await request(app.getHttpServer() as any)
+    const res: SupertestResponse = await request(app.getHttpServer())
       .post('/auth/login')
       .send({})
       .expect(400);
-    expect(typeof res.body === 'object' && res.body !== null && 'message' in (res.body as object)).toBe(true);
+    expect(
+      typeof res.body === 'object' &&
+        res.body !== null &&
+        'message' in (res.body as object),
+    ).toBe(true);
     expect((res.body as { message?: string }).message).toBeDefined();
   });
 
   it('/auth/register (POST) should return 400 for empty body', async () => {
-    const res: SupertestResponse = await request(app.getHttpServer() as any)
+    const res: SupertestResponse = await request(app.getHttpServer())
       .post('/auth/register')
       .send({})
       .expect(400);
-    expect(typeof res.body === 'object' && res.body !== null && 'message' in (res.body as object)).toBe(true);
+    expect(
+      typeof res.body === 'object' &&
+        res.body !== null &&
+        'message' in (res.body as object),
+    ).toBe(true);
     expect((res.body as { message?: string }).message).toBeDefined();
   });
 });
@@ -81,7 +89,7 @@ describe('AuthController (e2e, gateway+auth)', () => {
   });
 
   it('/auth/register (POST) should register new user', async () => {
-    const res: SupertestResponse = await request(app.getHttpServer() as any)
+    const res: SupertestResponse = await request(app.getHttpServer())
       .post('/auth/register')
       .send(testUser)
       .expect(201);
@@ -95,7 +103,7 @@ describe('AuthController (e2e, gateway+auth)', () => {
   });
 
   it('/auth/login (POST) should login with correct credentials', async () => {
-    const res: SupertestResponse = await request(app.getHttpServer() as any)
+    const res: SupertestResponse = await request(app.getHttpServer())
       .post('/auth/login')
       .send({ email: testUser.email, password: testUser.password })
       .expect(200);
@@ -109,14 +117,14 @@ describe('AuthController (e2e, gateway+auth)', () => {
   });
 
   it('/auth/login (POST) should fail with wrong password', async () => {
-    await request(app.getHttpServer() as any)
+    await request(app.getHttpServer())
       .post('/auth/login')
       .send({ email: testUser.email, password: 'wrongpass' })
       .expect(401);
   });
 
   it('/auth/logout (POST) should logout user and clear cookies', async () => {
-    const registerRes = await request(app.getHttpServer() as any)
+    const registerRes = await request(app.getHttpServer())
       .post('/auth/register')
       .send({
         name: 'Logout Test',
@@ -127,7 +135,7 @@ describe('AuthController (e2e, gateway+auth)', () => {
     expect(registerRes.body).toBeDefined();
     const cookies = registerRes.headers['set-cookie'] as unknown as string[];
 
-    const logoutRes = await request(app.getHttpServer() as any)
+    const logoutRes = await request(app.getHttpServer())
       .post('/auth/logout')
       .set('Cookie', cookies)
       .expect(200);
@@ -139,13 +147,15 @@ describe('AuthController (e2e, gateway+auth)', () => {
     expect(accessTokenCookie).toBeDefined();
     expect(accessTokenCookie).toMatch(/Max-Age=0|Expires=Thu, 01 Jan 1970/i);
 
-    const refreshTokenCookie = setCookies.find((c) => c.includes('refreshToken'));
+    const refreshTokenCookie = setCookies.find((c) =>
+      c.includes('refreshToken'),
+    );
     expect(refreshTokenCookie).toBeDefined();
     expect(refreshTokenCookie).toMatch(/Max-Age=0|Expires=Thu, 01 Jan 1970/i);
   });
 
   it('/auth/me (GET) should return user info for logged in user', async () => {
-    const registerRes = await request(app.getHttpServer() as any)
+    const registerRes = await request(app.getHttpServer())
       .post('/auth/register')
       .send({
         name: 'Me Test',
@@ -156,7 +166,7 @@ describe('AuthController (e2e, gateway+auth)', () => {
     const cookies = registerRes.headers['set-cookie'] as unknown as string[];
     expect(cookies).toBeDefined();
 
-    const meRes = await request(app.getHttpServer() as any)
+    const meRes = await request(app.getHttpServer())
       .get('/auth/me')
       .set('Cookie', cookies)
       .expect(200);
@@ -164,7 +174,7 @@ describe('AuthController (e2e, gateway+auth)', () => {
   });
 
   it('/auth/refresh-token (POST) should refresh tokens for valid refreshToken cookie', async () => {
-    const registerRes = await request(app.getHttpServer() as any)
+    const registerRes = await request(app.getHttpServer())
       .post('/auth/register')
       .send({
         name: 'Refresh Test',
@@ -175,7 +185,7 @@ describe('AuthController (e2e, gateway+auth)', () => {
     const cookies = registerRes.headers['set-cookie'] as unknown as string[];
     expect(cookies).toBeDefined();
 
-    const refreshRes = await request(app.getHttpServer() as any)
+    const refreshRes = await request(app.getHttpServer())
       .post('/auth/refresh-token')
       .set('Cookie', cookies)
       .expect(200);
@@ -183,14 +193,18 @@ describe('AuthController (e2e, gateway+auth)', () => {
     const setCookies = refreshRes.headers['set-cookie'] as unknown as string[];
     expect(setCookies).toBeDefined();
     const accessTokenCookie = setCookies.find((c) => c.includes('accessToken'));
-    const refreshTokenCookie = setCookies.find((c) => c.includes('refreshToken'));
-    
+    const refreshTokenCookie = setCookies.find((c) =>
+      c.includes('refreshToken'),
+    );
+
     expect(accessTokenCookie).toBeDefined();
     expect(refreshTokenCookie).toBeDefined();
     expect(refreshRes.body).toBeDefined();
-    
+
     const data =
-      typeof refreshRes.body === 'object' && refreshRes.body !== null && 'data' in refreshRes.body
+      typeof refreshRes.body === 'object' &&
+      refreshRes.body !== null &&
+      'data' in refreshRes.body
         ? (refreshRes.body as { data: { message: string } }).data
         : (refreshRes.body as { message: string });
 
@@ -199,7 +213,7 @@ describe('AuthController (e2e, gateway+auth)', () => {
   });
 
   it('/auth/refresh-token (POST) should fail with no refreshToken cookie', async () => {
-    const res = await request(app.getHttpServer() as any)
+    const res = await request(app.getHttpServer())
       .post('/auth/refresh-token')
       .expect(401);
     expect(res.body).toBeDefined();
@@ -207,17 +221,20 @@ describe('AuthController (e2e, gateway+auth)', () => {
   });
 
   it('/auth/refresh-token (POST) should fail with invalid refreshToken', async () => {
-    const fakeCookie = 'refreshToken=invalidtoken; Path=/auth/refresh-token; HttpOnly';
-    const res = await request(app.getHttpServer() as any)
+    const fakeCookie =
+      'refreshToken=invalidtoken; Path=/auth/refresh-token; HttpOnly';
+    const res = await request(app.getHttpServer())
       .post('/auth/refresh-token')
       .set('Cookie', fakeCookie)
       .expect(401);
     expect(res.body).toBeDefined();
-    expect((res.body as { message: string }).message).toMatch(/invalid|refresh token/i);
+    expect((res.body as { message: string }).message).toMatch(
+      /invalid|refresh token/i,
+    );
   });
 
   it('/auth/refresh-token (POST) should fail with expired refreshToken', async () => {
-    const registerRes = await request(app.getHttpServer() as any)
+    const registerRes = await request(app.getHttpServer())
       .post('/auth/register')
       .send({
         name: 'Expired Token Test',
@@ -233,12 +250,14 @@ describe('AuthController (e2e, gateway+auth)', () => {
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiaWF0IjoxMDAwLCJleHAiOjEwMDAwfQ.signature';
     const fakeCookie = `refreshToken=${expiredToken}; Path=/auth/refresh-token; HttpOnly`;
 
-    const res = await request(app.getHttpServer() as any)
+    const res = await request(app.getHttpServer())
       .post('/auth/refresh-token')
       .set('Cookie', fakeCookie)
-      .expect(401); 
+      .expect(401);
 
     expect(res.body).toBeDefined();
-    expect((res.body as { message: string }).message).toMatch(/invalid|refresh|expired/i);
+    expect((res.body as { message: string }).message).toMatch(
+      /invalid|refresh|expired/i,
+    );
   });
 });

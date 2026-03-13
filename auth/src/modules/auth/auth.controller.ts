@@ -1,11 +1,19 @@
 import { LoginDto, RegisterDto } from '@/common/dto/auth.dto';
-import { Body, Controller, Logger, Req, Res, UsePipes } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Logger,
+  Req,
+  Res,
+  UsePipes,
+} from '@nestjs/common';
 import { Post } from '@nestjs/common';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { AuthService } from './auth.service';
 import { Request, Response } from 'express';
-// import { Throttle } from '@nestjs/throttler';
 
 @Controller('auth')
 export class AuthController {
@@ -20,6 +28,7 @@ export class AuthController {
   @ApiResponse({ status: 500, description: 'Internal Server Error.' })
   @UsePipes(ZodValidationPipe)
   @Post('register')
+  @HttpCode(201)
   async register(
     @Body() dto: RegisterDto,
     @Res({ passthrough: true }) res: Response,
@@ -40,6 +49,7 @@ export class AuthController {
   @ApiResponse({ status: 500, description: 'Internal Server Error.' })
   @UsePipes(ZodValidationPipe)
   @Post('login')
+  @HttpCode(HttpStatus.OK)
   async login(
     @Body() dto: LoginDto,
     @Res({ passthrough: true }) res: Response,
@@ -53,6 +63,7 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'User logged out successfully.' })
   @ApiResponse({ status: 500, description: 'Internal Server Error.' })
   @Post('logout')
+  @HttpCode(200)
   async logout(
     @Req() req: Request & { user: { userId: string } },
     @Res({ passthrough: true }) res: Response,
@@ -74,6 +85,7 @@ export class AuthController {
   })
   @ApiResponse({ status: 500, description: 'Internal Server Error.' })
   @Post('me')
+  @HttpCode(200)
   me(): string {
     return 'me endpoint';
   }

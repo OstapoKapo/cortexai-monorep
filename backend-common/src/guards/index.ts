@@ -1,2 +1,2 @@
 export * from './secret-key.guard';
-export * from './at.guard';
+export * from './internal-auth.guard';

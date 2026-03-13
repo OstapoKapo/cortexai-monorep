@@ -5,7 +5,7 @@ import { ConfigModule } from '@nestjs/config';
 import { HttpModule } from '@nestjs/axios';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
-import { AtStrategy } from '@cortex/backend-common';
+import { AtStrategy } from '../../common/strategies/at.strategy';
 @Module({
   controllers: [ReportsController],
   imports: [

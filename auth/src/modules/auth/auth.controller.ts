@@ -16,7 +16,7 @@ import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { AuthService } from './auth.service';
 import { Request, Response } from 'express';
-import { AtGuard } from '@cortex/backend-common';
+import { InternalAuthGuard } from '@cortex/backend-common';
 
 @Controller('auth')
 export class AuthController {
@@ -62,7 +62,7 @@ export class AuthController {
     return { message: 'User logged in successfully' };
   }
 
-  @UseGuards(AtGuard)
+  @UseGuards(InternalAuthGuard)
   @ApiOperation({ summary: 'Logout a user' })
   @ApiResponse({ status: 200, description: 'User logged out successfully.' })
   @ApiResponse({
@@ -71,7 +71,7 @@ export class AuthController {
   })
   @ApiResponse({ status: 500, description: 'Internal Server Error.' })
   @Post('logout')
-  @HttpCode(200)
+  @HttpCode(HttpStatus.OK)
   async logout(
     @Req() req: Request & { user: { userId: string } },
     @Res({ passthrough: true }) res: Response,
@@ -80,6 +80,25 @@ export class AuthController {
     res.clearCookie('accessToken');
     res.clearCookie('refreshToken', { path: '/auth/refresh-token' });
     return { message: 'User logged out successfully' };
+  }
+
+  @ApiOperation({ summary: 'Refresh access and refresh tokens' })
+  @ApiResponse({ status: 200, description: 'Tokens refreshed successfully.' })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized. Invalid or missing refresh token.',
+  })
+  @ApiResponse({ status: 500, description: 'Internal Server Error.' })
+  @Post('refresh-token')
+  @HttpCode(HttpStatus.OK)
+  async refreshToken(
+    @Req() req: Request & { user: { userId: string } },
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<{ message: string; refreshed: boolean }> {
+    const { accessToken, newRefreshToken } =
+      await this.authService.refreshTokens(req);
+    this.createCookie(res, accessToken, newRefreshToken);
+    return { message: 'Tokens refreshed successfully', refreshed: true };
   }
 
   @ApiOperation({ summary: 'Get current user info' })
@@ -92,9 +111,8 @@ export class AuthController {
     description: 'Unauthorized. User not logged in.',
   })
   @ApiResponse({ status: 500, description: 'Internal Server Error.' })
-  @UseGuards(AtGuard)
   @Get('me')
-  @HttpCode(200)
+  @HttpCode(HttpStatus.OK)
   me(): string {
     return 'me endpoint';
   }

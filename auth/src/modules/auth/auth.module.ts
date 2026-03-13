@@ -3,7 +3,6 @@ import { AuthController } from './auth.controller';
 import { UsersModule } from '../users/users.module';
 import { AuthService } from './auth.service';
 import { JwtModule } from '@nestjs/jwt';
-import { AtStrategy } from '@cortex/backend-common';
 import { PassportModule } from '@nestjs/passport';
 
 @Module({
@@ -13,7 +12,7 @@ import { PassportModule } from '@nestjs/passport';
     JwtModule.register({}),
     PassportModule.register({ defaultStrategy: 'jwt' }),
   ],
-  providers: [AuthService, AtStrategy],
+  providers: [AuthService],
   exports: [JwtModule],
 })
 export class AuthModule {}

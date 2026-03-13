@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Post,
@@ -97,6 +98,47 @@ export class AuthController {
           ),
         ),
       { forwardSetCookie: true },
+    );
+  }
+
+  @Post('logout')
+  @HttpCode(200)
+  async logout(
+    @Res({ passthrough: true }) res: Response,
+    @Req() req: AuthenticatedRequest,
+  ): Promise<{ message: string }> {
+    return this.proxyService.forwardRequest<{ message: string }>(
+      req,
+      res,
+      (headers) =>
+        firstValueFrom(
+          this.httpService.post(
+            `${this.authServiceUrl}/auth/logout`,
+            {},
+            { headers },
+          ),
+        ),
+      { forwardSetCookie: true, forwardUserId: true },
+    );
+  }
+
+  @Get('me')
+  @HttpCode(200)
+  async me(
+    @Res({ passthrough: true }) res: Response,
+    @Req() req: AuthenticatedRequest,
+  ): Promise<any> {
+    return this.proxyService.forwardRequest<any>(
+      req,
+      res,
+      (headers) =>
+        firstValueFrom(
+          this.httpService.get(
+            `${this.authServiceUrl}/auth/me`,
+            { headers },
+          ),
+        ),
+      { forwardSetCookie: true, forwardUserId: true },
     );
   }
 }

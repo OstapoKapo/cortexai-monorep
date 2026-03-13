@@ -45,6 +45,11 @@ export class ProxyService {
         Object.assign(headers, options.extraHeaders);
       }
 
+      // Forward cookies from client to downstream service
+      if (req.headers.cookie) {
+        headers['cookie'] = req.headers.cookie;
+      }
+
       const response = await axiosRequest(headers);
 
       if (options?.forwardSetCookie && response.headers['set-cookie']) {

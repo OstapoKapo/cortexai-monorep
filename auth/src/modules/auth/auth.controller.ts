@@ -2,11 +2,13 @@ import { LoginDto, RegisterDto } from '@/common/dto/auth.dto';
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Logger,
   Req,
   Res,
+  UseGuards,
   UsePipes,
 } from '@nestjs/common';
 import { Post } from '@nestjs/common';
@@ -14,6 +16,7 @@ import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { AuthService } from './auth.service';
 import { Request, Response } from 'express';
+import { AtGuard } from '@cortex/backend-common';
 
 @Controller('auth')
 export class AuthController {
@@ -59,8 +62,10 @@ export class AuthController {
     return { message: 'User logged in successfully' };
   }
 
+  @UseGuards(AtGuard)
   @ApiOperation({ summary: 'Logout a user' })
   @ApiResponse({ status: 200, description: 'User logged out successfully.' })
+  @ApiResponse({ status: 401, description: 'Unauthorized. User not logged in.' })
   @ApiResponse({ status: 500, description: 'Internal Server Error.' })
   @Post('logout')
   @HttpCode(200)
@@ -84,7 +89,8 @@ export class AuthController {
     description: 'Unauthorized. User not logged in.',
   })
   @ApiResponse({ status: 500, description: 'Internal Server Error.' })
-  @Post('me')
+  @UseGuards(AtGuard)
+  @Get('me')
   @HttpCode(200)
   me(): string {
     return 'me endpoint';

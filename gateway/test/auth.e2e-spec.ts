@@ -86,6 +86,7 @@ describe('AuthController (e2e, gateway+auth)', () => {
         : (res.body as { message: string });
     expect(data).toHaveProperty('message');
     expect(data.message).toMatch(/registered/i);
+    expect(res.headers['set-cookie']).toBeDefined();
   });
 
   it('/auth/login (POST) should login with correct credentials', async () => {
@@ -117,5 +118,55 @@ describe('AuthController (e2e, gateway+auth)', () => {
     expect(res.status).not.toBe(200);
     expect([401, 403]).toContain(res.status);
     expect(typeof res.body === 'object' && 'message' in res.body).toBe(true);
+  });
+
+  it('/auth/logout (POST) should logout user and clear cookies', async () => {
+    const registerRes = await request(app.getHttpServer())
+      .post('/auth/register')
+      .send({
+        name: 'Logout Test',
+        email: `logout_test_${Date.now()}@example.com`,
+        password: 'logoutpass123',
+      })
+      .expect(201);
+    expect(registerRes.body).toBeDefined();
+   const cookies = registerRes.headers['set-cookie'];
+
+  const logoutRes = await request(app.getHttpServer())
+    .post('/auth/logout')
+    .set('Cookie', cookies)
+    .expect(200);
+
+
+  const setCookies = logoutRes.headers['set-cookie'] as unknown as string[];
+  expect(setCookies).toBeDefined();
+
+  const accessTokenCookie = setCookies.find(c => c.includes('accessToken'));
+  expect(accessTokenCookie).toBeDefined();
+  
+  expect(accessTokenCookie).toMatch(/Max-Age=0|Expires=Thu, 01 Jan 1970/i);
+
+  const refreshTokenCookie = setCookies.find(c => c.includes('refreshToken'));
+  expect(refreshTokenCookie).toBeDefined();
+  expect(refreshTokenCookie).toMatch(/Max-Age=0|Expires=Thu, 01 Jan 1970/i);
+});
+
+  it('/auth/me (GET) should return user info for logged in user', async () => {
+    const registerRes = await request(app.getHttpServer())
+      .post('/auth/register')
+      .send({
+        name: 'Me Test',
+        email: `me_test_${Date.now()}@example.com`,
+        password: 'mepass123',
+      })
+      .expect(201);
+    const cookies = registerRes.headers['set-cookie'];
+    expect(cookies).toBeDefined();
+
+    const meRes = await request(app.getHttpServer())
+      .get('/auth/me')
+      .set('Cookie', cookies)
+      .expect(200);
+    expect(meRes.text.length).toBeGreaterThan(0);
   });
 });

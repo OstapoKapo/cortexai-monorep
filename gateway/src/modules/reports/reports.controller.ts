@@ -10,7 +10,7 @@ import {
 } from '@nestjs/swagger';
 import type { Response } from 'express';
 import { UploadResponseDto } from 'src/common/dto/reports.dto';
-import { AtGuard } from 'src/common/guards/at.guard';
+import { AtGuard } from '@cortex/backend-common';
 import type { AuthenticatedRequest } from 'src/common/services/proxy.service';
 
 @Controller('reports')

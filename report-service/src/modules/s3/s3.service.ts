@@ -2,6 +2,7 @@ import {
   DeleteObjectCommand,
   PutObjectCommand,
   S3Client,
+  HeadBucketCommand,
 } from '@aws-sdk/client-s3';
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -25,6 +26,7 @@ export class S3Service implements OnModuleInit {
       },
       forcePathStyle: true,
     });
+    this.bucketName = this.configService.getOrThrow<string>('AWS_BUCKET_NAME');
   }
 
   async uploadFile(
@@ -32,7 +34,6 @@ export class S3Service implements OnModuleInit {
     file: Buffer,
     mimeType: string,
   ): Promise<string> {
-    this.bucketName = this.configService.getOrThrow<string>('AWS_BUCKET_NAME');
     const command = new PutObjectCommand({
       Bucket: this.bucketName,
       Key: key,
@@ -61,6 +62,20 @@ export class S3Service implements OnModuleInit {
       const message = error instanceof Error ? error.message : String(error);
       this.logger.error(`Failed to delete file from S3: ${message}`);
       throw error;
+    }
+  }
+
+  async isHealthy(): Promise<boolean> {
+    try {
+      await this.s3Client.send(
+        new HeadBucketCommand({
+          Bucket: this.bucketName,
+        }),
+      );
+      return true;
+    } catch (error) {
+      this.logger.error('S3 health check failed', error);
+      return false;
     }
   }
 }

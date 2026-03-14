@@ -1,13 +1,12 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Get,
-  Headers,
   HttpStatus,
   ParseFilePipeBuilder,
   Post,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
   UsePipes,
 } from '@nestjs/common';
@@ -24,11 +23,13 @@ import {
   UploadResponseDto,
 } from 'src/common/dto/reports.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { InternalAuthGuard, UserId } from '@cortex/backend-common';
 
 @Controller('templates')
 export class TemplatesController {
   constructor(private readonly templatesService: TemplatesService) {}
 
+  @UseGuards(InternalAuthGuard)
   @Post('template')
   @ApiOperation({ summary: 'Create a new report template' })
   @ApiResponse({
@@ -56,20 +57,18 @@ export class TemplatesController {
   })
   @UsePipes(ZodValidationPipe)
   async createTemplate(
-    @Headers('x-user-id') userId: string | undefined,
     @Body() dto: CreateTemplateDto,
+    // TODO: For MVP only basic file validation (type/size). Consider adding mime-type/content checks post-MVP.
     @UploadedFile(
       new ParseFilePipeBuilder()
         .addFileTypeValidator({ fileType: '.(docx|pdf)' })
         .addMaxSizeValidator({ maxSize: 4 * 1024 * 1024 })
         .build({ errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY }),
     )
+    @UserId()
+    userId: string,
     file: Express.Multer.File,
   ): Promise<UploadResponseDto> {
-    if (!userId) {
-      throw new BadRequestException('X-User-Id header is required');
-    }
-
     const result = await this.templatesService.createTemplate(
       userId,
       file,

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { S3Service } from '../s3/s3.service';
 import { CreateTemplateDto } from 'src/common/dto/reports.dto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -7,20 +7,25 @@ import { v4 as uuid } from 'uuid';
 
 @Injectable()
 export class TemplatesService {
+  private readonly logger = new Logger(TemplatesService.name);
+
   constructor(
     private readonly s3Service: S3Service,
     private readonly prismaService: PrismaService,
   ) {}
+
+  private buildS3Key(userId: string, originalName: string): string {
+    const fileExt = path.extname(originalName);
+    const uniqueId = uuid();
+    return `templates/${userId}/${uniqueId}${fileExt}`;
+  }
 
   async createTemplate(
     userId: string,
     file: Express.Multer.File,
     dto: CreateTemplateDto,
   ): Promise<{ url: string }> {
-    const fileExt = path.extname(file.originalname);
-    const uniqueId = uuid();
-    const s3Key = `templates/${userId}/${uniqueId}${fileExt}`;
-
+    const s3Key = this.buildS3Key(userId, file.originalname);
     const uploadResult = await this.s3Service.uploadFile(
       s3Key,
       file.buffer,
@@ -42,6 +47,10 @@ export class TemplatesService {
       });
       return { url: uploadResult };
     } catch (error) {
+      this.logger.error(
+        'Failed to create template in DB, rolling back S3 upload',
+        error,
+      );
       await this.s3Service.deleteFile(s3Key);
       throw error;
     }

@@ -16,7 +16,7 @@ import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { AuthService } from './auth.service';
 import { Request, Response } from 'express';
-import { InternalAuthGuard } from '@cortex/backend-common';
+import { InternalAuthGuard, UserId } from '@cortex/backend-common';
 
 @Controller('auth')
 export class AuthController {
@@ -73,10 +73,10 @@ export class AuthController {
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   async logout(
-    @Req() req: Request & { user: { userId: string } },
+    @UserId() userId: string,
     @Res({ passthrough: true }) res: Response,
   ): Promise<{ message: string }> {
-    await this.authService.logout(req.user.userId);
+    await this.authService.logout(userId);
     res.clearCookie('accessToken');
     res.clearCookie('refreshToken', { path: '/auth/refresh-token' });
     return { message: 'User logged out successfully' };

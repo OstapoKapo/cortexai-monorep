@@ -1,4 +1,5 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Request, Response } from 'express';
 import { UsersService } from '../users/users.service';
 import { LoginDto, RegisterDto } from '@/common/dto/auth.dto';
 import { AppErrors } from '@cortex/shared';
@@ -7,6 +8,13 @@ import { User } from '@prisma/auth-client';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 
+interface JwtPayload {
+  email: string;
+  sub: string;
+  iat: number;
+  exp: number;
+}
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -14,6 +22,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
   ) {}
+
   private async validateUser(dto: LoginDto): Promise<User> {
     const user = await this.usersService.getUserByEmail(dto.email);
     if (user === null)
@@ -42,6 +51,38 @@ export class AuthService {
   ): Promise<{ accessToken: string; refreshToken: string }> {
     const user = await this.validateUser(dto);
     return this.createTokens(user.id, user.email);
+  }
+
+  async refreshTokens(
+    req: Request,
+  ): Promise<{ accessToken: string; newRefreshToken: string }> {
+    const cookies = req.cookies as Record<string, string | undefined>;
+    const refreshToken = cookies?.refreshToken;
+    if (!refreshToken) throw new UnauthorizedException('No refresh token');
+
+    let payload: JwtPayload;
+    try {
+      payload = this.jwtService.verify(refreshToken, {
+        secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+      });
+    } catch {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+
+    const user = await this.usersService.getUserByEmail(payload.email);
+    if (!user || !user.refreshToken)
+      throw new UnauthorizedException('User not found');
+
+    const valid = await argon2.verify(user.refreshToken, refreshToken);
+    if (!valid) throw new UnauthorizedException('Invalid refresh token');
+
+    const { accessToken, refreshToken: newRefreshToken } =
+      await this.createTokens(user.id, user.email);
+    await this.usersService.changeUserData(user.id, {
+      refreshToken: await this.hashPassword(newRefreshToken),
+    });
+
+    return { accessToken, newRefreshToken };
   }
 
   async logout(userId: string): Promise<void> {

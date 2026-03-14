@@ -4,9 +4,8 @@ import { ReportsController } from './reports.controller';
 import { ConfigModule } from '@nestjs/config';
 import { HttpModule } from '@nestjs/axios';
 import { JwtModule } from '@nestjs/jwt';
-import { AtStrategy } from 'src/common/strategies/at.strategy';
 import { PassportModule } from '@nestjs/passport';
-
+import { AtStrategy } from '../../common/strategies/at.strategy';
 @Module({
   controllers: [ReportsController],
   imports: [

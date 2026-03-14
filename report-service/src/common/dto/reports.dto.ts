@@ -9,13 +9,14 @@ export class CreateTemplateDto extends CreateTemplateZodDto {}
 export class UploadResponseDto {
   @ApiProperty({
     example: 'https://s3.amazonaws.com/bucket/file.pdf',
-    description: 'Пряме посилання на завантажений файл',
+    description: 'S3 URL, where the uploaded report template can be accessed',
   })
   url: string;
 
   @ApiProperty({
     example: 'Report template created successfully.',
-    description: 'Повідомлення про успішне створення шаблону звіту',
+    description:
+      'Message indicating successful creation of the report template',
   })
   message: string;
 }

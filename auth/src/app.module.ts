@@ -20,7 +20,10 @@ import { APP_GUARD } from '@nestjs/core';
     AuthModule,
     UsersModule,
     PrismaModule,
-    ConfigModule.forRoot({ isGlobal: true, envFilePath: `.env` }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: process.env.NODE_ENV === 'test' ? '.env.test' : '.env',
+    }),
     ThrottlerModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

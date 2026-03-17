@@ -2,7 +2,10 @@ import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ReportsModule } from './modules/reports/reports.module';
 import { S3Module } from './modules/s3/s3.module';
-import { CorrelationIDMiddleware } from '@cortex/backend-common';
+import {
+  CorrelationIDMiddleware,
+  SecretKeyGuard,
+} from '@cortex/backend-common';
 import {
   ThrottlerGuard,
   ThrottlerModule,
@@ -64,6 +67,10 @@ import { TemplatesModule } from './modules/templates/templates.module';
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: SecretKeyGuard,
     },
   ],
 })

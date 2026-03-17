@@ -1,8 +1,11 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  HttpCode,
   HttpStatus,
+  Param,
   ParseFilePipeBuilder,
   Post,
   UploadedFile,
@@ -20,7 +23,10 @@ import {
 import { ZodValidationPipe } from 'nestjs-zod';
 import {
   CreateTemplateDto,
-  UploadResponseDto,
+  DeleteTemplateResponseDto,
+  DownloadTemplateResponseDto,
+  GetTemplatesResponseDto,
+  UploadTemplateResponseDto,
 } from 'src/common/dto/reports.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { InternalAuthGuard, UserId } from '@cortex/backend-common';
@@ -35,7 +41,7 @@ export class TemplatesController {
   @ApiResponse({
     status: 201,
     description: 'Report template created successfully.',
-    type: UploadResponseDto,
+    type: UploadTemplateResponseDto,
   })
   @ApiResponse({ status: 400, description: 'Bad Request.' })
   @ApiResponse({ status: 500, description: 'Internal Server Error.' })
@@ -68,7 +74,7 @@ export class TemplatesController {
     @UserId()
     userId: string,
     file: Express.Multer.File,
-  ): Promise<UploadResponseDto> {
+  ): Promise<UploadTemplateResponseDto> {
     const result = await this.templatesService.createTemplate(
       userId,
       file,
@@ -78,9 +84,63 @@ export class TemplatesController {
   }
 
   @Get()
-  async getTemplates(): Promise<{ message: string }> {
-    // TODO: Implement template listing
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    return { message: 'Not implemented yet' };
+  @UseGuards(InternalAuthGuard)
+  @ApiResponse({
+    status: 200,
+    type: GetTemplatesResponseDto,
+    description: 'List of report templates retrieved successfully.',
+  })
+  @ApiResponse({ status: 400, description: 'Bad Request.' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error.' })
+  @HttpCode(HttpStatus.OK)
+  async getTemplates(
+    @UserId() userId: string,
+  ): Promise<GetTemplatesResponseDto> {
+    const templates = await this.templatesService.getTemplatesForUser(userId);
+    return { message: 'Report templates retrieved successfully.', templates };
+  }
+
+  @Delete(':id')
+  @UseGuards(InternalAuthGuard)
+  @ApiOperation({ summary: 'Delete a report template' })
+  @ApiResponse({
+    status: 200,
+    description: 'Report template deleted successfully.',
+    type: DeleteTemplateResponseDto,
+  })
+  @ApiResponse({ status: 400, description: 'Bad Request.' })
+  @ApiResponse({ status: 404, description: 'Template not found.' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error.' })
+  async deleteTemplate(
+    @UserId() userId: string,
+    @Param('id') templateId: string,
+  ): Promise<{ message: string }> {
+    await this.templatesService.deleteTemplate(templateId, userId);
+    return { message: 'Report template deleted successfully.' };
+  }
+
+  @Get(':id/download')
+  @UseGuards(InternalAuthGuard)
+  @ApiOperation({ summary: 'Download a report template' })
+  @ApiResponse({
+    status: 200,
+    description: 'Report template download URL retrieved successfully.',
+    type: DownloadTemplateResponseDto,
+  })
+  @ApiResponse({ status: 400, description: 'Bad Request.' })
+  @ApiResponse({ status: 404, description: 'Template not found.' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error.' })
+  async downloadTemplate(
+    @UserId() userId: string,
+    @Param('id') templateId: string,
+  ): Promise<DownloadTemplateResponseDto> {
+    const { url } = await this.templatesService.getTemplateDownloadUrlById(
+      templateId,
+      userId,
+    );
+    return {
+      url,
+      message: 'Report template download URL retrieved successfully.',
+    };
   }
 }

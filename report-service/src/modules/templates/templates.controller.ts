@@ -21,15 +21,16 @@ import {
   ApiResponse,
 } from '@nestjs/swagger';
 import { ZodValidationPipe } from 'nestjs-zod';
+import { CreateTemplateDto } from '@cortex/backend-common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import {
-  CreateTemplateDto,
   DeleteTemplateResponseDto,
   DownloadTemplateResponseDto,
   GetTemplatesResponseDto,
+  InternalAuthGuard,
   UploadTemplateResponseDto,
-} from 'src/common/dto/reports.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { InternalAuthGuard, UserId } from '@cortex/backend-common';
+  UserId,
+} from '@cortex/backend-common';
 
 @Controller('templates')
 export class TemplatesController {

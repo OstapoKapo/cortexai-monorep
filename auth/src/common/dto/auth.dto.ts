@@ -7,3 +7,7 @@ export class RegisterDto extends RegisterZodDto {}
 
 const LoginZodDto: ZodDto<typeof loginSchema> = createZodDto(loginSchema);
 export class LoginDto extends LoginZodDto {}
+
+export class BasicResponseDto {
+  message: string;
+}

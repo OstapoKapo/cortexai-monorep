@@ -3,7 +3,9 @@ import { S3Service } from '../s3/s3.service';
 import { CreateTemplateDto } from 'src/common/dto/reports.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import * as path from 'path';
+import { Template } from '@cortex/shared';
 import { v4 as uuid } from 'uuid';
+import { NotFoundException, ForbiddenException } from '@nestjs/common';
 
 @Injectable()
 export class TemplatesService {
@@ -54,5 +56,59 @@ export class TemplatesService {
       await this.s3Service.deleteFile(s3Key);
       throw error;
     }
+  }
+
+  async getTemplatesForUser(userId: string): Promise<Template[]> {
+    return this.prismaService.template.findMany({
+      where: { userId },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        fileUrl: true,
+        originalFileName: true,
+        mimeType: true,
+        size: true,
+        userId: true,
+        updatedAt: true,
+        createdAt: true,
+      },
+    });
+  }
+
+  async deleteTemplate(templateId: string, userId: string): Promise<void> {
+    const template = await this.prismaService.template.findUnique({
+      where: { id: templateId },
+    });
+
+    if (!template) {
+      throw new NotFoundException('Template not found');
+    }
+
+    if (template.userId !== userId) {
+      throw new ForbiddenException('Unauthorized to delete this template');
+    }
+
+    await this.s3Service.deleteFile(template.storageKey);
+    await this.prismaService.template.delete({ where: { id: templateId } });
+  }
+
+  async getTemplateDownloadUrlById(
+    templateId: string,
+    userId: string,
+  ): Promise<{ url: string }> {
+    const template = await this.prismaService.template.findUnique({
+      where: { id: templateId },
+    });
+
+    if (!template) {
+      throw new NotFoundException('Template not found');
+    }
+
+    if (template.userId !== userId) {
+      throw new ForbiddenException('Unauthorized to access this template');
+    }
+
+    return { url: template.fileUrl };
   }
 }

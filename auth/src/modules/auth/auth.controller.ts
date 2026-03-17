@@ -1,4 +1,4 @@
-import { LoginDto, RegisterDto } from '@/common/dto/auth.dto';
+import { BasicResponseDto, LoginDto, RegisterDto } from '@/common/dto/auth.dto';
 import {
   Body,
   Controller,
@@ -25,7 +25,11 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @ApiOperation({ summary: 'Register a new user' })
-  @ApiResponse({ status: 201, description: 'User registered successfully.' })
+  @ApiResponse({
+    status: 201,
+    description: 'User registered successfully.',
+    type: BasicResponseDto,
+  })
   @ApiResponse({ status: 400, description: 'Bad Request.' })
   @ApiResponse({ status: 409, description: 'Conflict. User already exists.' })
   @ApiResponse({ status: 500, description: 'Internal Server Error.' })
@@ -35,7 +39,7 @@ export class AuthController {
   async register(
     @Body() dto: RegisterDto,
     @Res({ passthrough: true }) res: Response,
-  ): Promise<{ message?: string }> {
+  ): Promise<BasicResponseDto> {
     this.logger.debug(`Register attempt for email: ${dto.email}`);
     const result = await this.authService.register(dto);
     this.createCookie(res, result.accessToken, result.refreshToken);
@@ -43,7 +47,11 @@ export class AuthController {
   }
 
   @ApiOperation({ summary: 'Login a user' })
-  @ApiResponse({ status: 200, description: 'User logged in successfully.' })
+  @ApiResponse({
+    status: 200,
+    description: 'User logged in successfully.',
+    type: BasicResponseDto,
+  })
   @ApiResponse({ status: 400, description: 'Bad Request.' })
   @ApiResponse({
     status: 401,
@@ -56,7 +64,7 @@ export class AuthController {
   async login(
     @Body() dto: LoginDto,
     @Res({ passthrough: true }) res: Response,
-  ): Promise<{ message?: string }> {
+  ): Promise<BasicResponseDto> {
     const result = await this.authService.login(dto);
     this.createCookie(res, result.accessToken, result.refreshToken);
     return { message: 'User logged in successfully' };
@@ -64,7 +72,11 @@ export class AuthController {
 
   @UseGuards(InternalAuthGuard)
   @ApiOperation({ summary: 'Logout a user' })
-  @ApiResponse({ status: 200, description: 'User logged out successfully.' })
+  @ApiResponse({
+    status: 200,
+    description: 'User logged out successfully.',
+    type: BasicResponseDto,
+  })
   @ApiResponse({
     status: 401,
     description: 'Unauthorized. User not logged in.',
@@ -75,7 +87,7 @@ export class AuthController {
   async logout(
     @UserId() userId: string,
     @Res({ passthrough: true }) res: Response,
-  ): Promise<{ message: string }> {
+  ): Promise<BasicResponseDto> {
     await this.authService.logout(userId);
     res.clearCookie('accessToken');
     res.clearCookie('refreshToken', { path: '/auth/refresh-token' });
@@ -83,7 +95,11 @@ export class AuthController {
   }
 
   @ApiOperation({ summary: 'Refresh access and refresh tokens' })
-  @ApiResponse({ status: 200, description: 'Tokens refreshed successfully.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Tokens refreshed successfully.',
+    type: BasicResponseDto,
+  })
   @ApiResponse({
     status: 401,
     description: 'Unauthorized. Invalid or missing refresh token.',
@@ -94,7 +110,7 @@ export class AuthController {
   async refreshToken(
     @Req() req: Request & { user: { userId: string } },
     @Res({ passthrough: true }) res: Response,
-  ): Promise<{ message: string; refreshed: boolean }> {
+  ): Promise<BasicResponseDto & { refreshed: boolean }> {
     const { accessToken, newRefreshToken } =
       await this.authService.refreshTokens(req);
     this.createCookie(res, accessToken, newRefreshToken);

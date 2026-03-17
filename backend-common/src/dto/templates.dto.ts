@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { createZodDto, ZodDto } from 'nestjs-zod';
 import { UploadTemplateSchema } from '@cortex/shared/schemas/reports.schema';
-import type { UploadTemplateResponse, GetTemplatesResponse, DeleteTemplateResponse, DownloadTemplateResponse } from '@cortex/shared/types/template-responses';
+import type { UploadTemplateResponse, GetTemplatesResponse, DeleteTemplateResponse, DownloadTemplateResponse } from '@cortex/shared';
 import type { Template } from '@cortex/shared/types/template';
 
 // --- CreateTemplateDto ---

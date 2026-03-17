@@ -3,7 +3,6 @@ import { UploadTemplateSchema } from '@cortex/shared';
 import type { Template } from '@cortex/shared';
 import { ApiProperty } from '@nestjs/swagger';
 
-
 const CreateTemplateZodDto: ZodDto<typeof UploadTemplateSchema> =
   createZodDto(UploadTemplateSchema);
 export class CreateTemplateDto extends CreateTemplateZodDto {}

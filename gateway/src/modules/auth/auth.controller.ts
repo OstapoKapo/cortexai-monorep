@@ -14,11 +14,7 @@ import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { ProxyService } from '../../common/services/proxy.service';
 import type { AuthenticatedRequest } from '../../common/services/proxy.service';
-import {
-  AuthResponseDto,
-  LoginDto,
-  RegisterDto,
-} from 'src/common/dto/auth.dto';
+import { AuthResponseDto, LoginDto, RegisterDto } from '@cortex/backend-common';
 import { firstValueFrom } from 'rxjs';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { ApiResponse } from '@nestjs/swagger';

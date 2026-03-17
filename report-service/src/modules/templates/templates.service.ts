@@ -1,11 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { S3Service } from '../s3/s3.service';
-import { CreateTemplateDto } from 'src/common/dto/reports.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import * as path from 'path';
 import { Template } from '@cortex/shared';
 import { v4 as uuid } from 'uuid';
 import { NotFoundException, ForbiddenException } from '@nestjs/common';
+import { CreateTemplateDto } from '@cortex/backend-common';
 
 @Injectable()
 export class TemplatesService {

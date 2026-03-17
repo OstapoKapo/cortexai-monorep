@@ -1,4 +1,8 @@
-import { BasicResponseDto, LoginDto, RegisterDto } from '@/common/dto/auth.dto';
+import {
+  BasicResponseDto,
+  LoginDto,
+  RegisterDto,
+} from '@cortex/backend-common';
 import {
   Body,
   Controller,

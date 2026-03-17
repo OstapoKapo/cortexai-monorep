@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { Request, Response } from 'express';
+import { Request } from 'express';
 import { UsersService } from '../users/users.service';
-import { LoginDto, RegisterDto } from '@/common/dto/auth.dto';
+import { LoginDto, RegisterDto } from '@cortex/backend-common';
 import { AppErrors } from '@cortex/shared';
 import * as argon2 from 'argon2';
 import { User } from '@prisma/auth-client';

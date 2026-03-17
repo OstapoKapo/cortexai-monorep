@@ -1,15 +1,15 @@
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { authService } from "./auth.services";
-import { LoginDtoType, RegisterDtoType, ILoginResponse, IRegisterResponse, ILogoutResponse } from "@cortex/shared";
+import { authService, IAuthResponse } from "./auth.services";
+import { LoginDtoType, RegisterDtoType, } from "@cortex/shared";
 import { set } from "zod";
 
 
 export const useLoginMutation = () => {
     const router = useRouter();
 
-    return useMutation<ILoginResponse, unknown, LoginDtoType>({
+    return useMutation<IAuthResponse, unknown, LoginDtoType>({
         mutationFn: (data) => authService.login(data),
         onSuccess: async () => {
             toast.success("Login successful!");
@@ -22,7 +22,7 @@ export const useLoginMutation = () => {
 export const useLogoutMutation = () => {
     const router = useRouter();
 
-    return useMutation<ILogoutResponse, unknown, void>({
+    return useMutation<IAuthResponse, unknown, void>({
         mutationFn: () => authService.logout(),
         onSuccess: async () => {
             toast.success("Logout successful!");
@@ -35,7 +35,7 @@ export const useLogoutMutation = () => {
 export const useRegisterMutation = () => {
     const router = useRouter();
 
-    return useMutation<IRegisterResponse, unknown, RegisterDtoType>({
+    return useMutation<IAuthResponse, unknown, RegisterDtoType>({
         mutationFn: (data) => authService.register(data),
         onSuccess: async () => {
             toast.success("Registration successful!");

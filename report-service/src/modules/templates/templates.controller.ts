@@ -21,7 +21,7 @@ import {
   ApiResponse,
 } from '@nestjs/swagger';
 import { ZodValidationPipe } from 'nestjs-zod';
-import { CreateTemplateDto } from 'src/common/dto/reports.dto';
+import { CreateTemplateDto } from '@cortex/backend-common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
   DeleteTemplateResponseDto,

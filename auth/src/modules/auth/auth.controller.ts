@@ -25,7 +25,11 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @ApiOperation({ summary: 'Register a new user' })
-  @ApiResponse({ status: 201, description: 'User registered successfully.', type: BasicResponseDto })
+  @ApiResponse({
+    status: 201,
+    description: 'User registered successfully.',
+    type: BasicResponseDto,
+  })
   @ApiResponse({ status: 400, description: 'Bad Request.' })
   @ApiResponse({ status: 409, description: 'Conflict. User already exists.' })
   @ApiResponse({ status: 500, description: 'Internal Server Error.' })
@@ -43,7 +47,11 @@ export class AuthController {
   }
 
   @ApiOperation({ summary: 'Login a user' })
-  @ApiResponse({ status: 200, description: 'User logged in successfully.', type: BasicResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: 'User logged in successfully.',
+    type: BasicResponseDto,
+  })
   @ApiResponse({ status: 400, description: 'Bad Request.' })
   @ApiResponse({
     status: 401,
@@ -64,7 +72,11 @@ export class AuthController {
 
   @UseGuards(InternalAuthGuard)
   @ApiOperation({ summary: 'Logout a user' })
-  @ApiResponse({ status: 200, description: 'User logged out successfully.', type: BasicResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: 'User logged out successfully.',
+    type: BasicResponseDto,
+  })
   @ApiResponse({
     status: 401,
     description: 'Unauthorized. User not logged in.',
@@ -83,7 +95,11 @@ export class AuthController {
   }
 
   @ApiOperation({ summary: 'Refresh access and refresh tokens' })
-  @ApiResponse({ status: 200, description: 'Tokens refreshed successfully.', type: BasicResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Tokens refreshed successfully.',
+    type: BasicResponseDto,
+  })
   @ApiResponse({
     status: 401,
     description: 'Unauthorized. Invalid or missing refresh token.',

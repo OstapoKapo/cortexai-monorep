@@ -3,9 +3,7 @@ import { TemplatesController } from './templates.controller';
 import { TemplatesService } from './templates.service';
 import { Template } from '@cortex/shared';
 import { InternalAuthGuard, UserId } from '@cortex/backend-common';
-import { ZodValidationPipe } from 'nestjs-zod';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { ExecutionContext } from '@nestjs/common';
+
 
 const mockDto = { name: 'Test', description: 'Test desc' };
 const mockFile = { originalname: 'file.docx', buffer: Buffer.from('test') } as any;
@@ -62,8 +60,8 @@ describe('TemplatesController', () => {
     it('should call service and return url', async () => {
       const result = await controller.createTemplate(
         mockDto as any,
-        mockUserId,
         mockFile,
+        mockUserId,
       );
       expect(service.createTemplate).toHaveBeenCalledWith(
         mockUserId,
@@ -76,7 +74,7 @@ describe('TemplatesController', () => {
     it('should throw if service throws', async () => {
       (service.createTemplate as jest.Mock).mockRejectedValueOnce(new Error('Service error'));
       await expect(
-        controller.createTemplate(mockDto as any, mockUserId, mockFile)
+        controller.createTemplate(mockDto as any, mockFile, mockUserId)
       ).rejects.toThrow('Service error');
     });
   });

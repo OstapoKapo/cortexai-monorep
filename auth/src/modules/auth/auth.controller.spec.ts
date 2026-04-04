@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { Response } from 'express';
-import { AuthController } from '../../src/modules/auth/auth.controller';
-import { AuthService } from '../../src/modules/auth/auth.service';
-import { RegisterDto, LoginDto } from '../../src/common/dto/auth.dto';
+import { AuthService } from './auth.service';
+import { AuthController } from './auth.controller';
+import { LoginDto, RegisterDto } from '@cortex/backend-common';
 describe('AuthController', () => {
   let controller: AuthController;
   let authService: AuthService;

@@ -89,6 +89,6 @@
     ],
     "moduleNameMapper": {
       "^src/(.*)$": "<rootDir>/$1"
-    } 
+    }
   }
 }

@@ -9,7 +9,7 @@ import {
   TransformInterceptor,
 } from '@cortex/backend-common';
 import { RemoveUserIdInterceptor } from './common/interceptors';
-import * as cookieParser from 'cookie-parser';
+import cookieParser from 'cookie-parser';
 import { ZodValidationPipe } from 'nestjs-zod';
 dotenv.config();
 async function bootstrap() {

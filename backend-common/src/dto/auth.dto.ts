@@ -15,7 +15,7 @@ export class AuthResponseDto {
     example: 'User logged in successfully.',
     description: 'Повідомлення про успішний вхід користувача',
   })
-  message: string;
+  message!: string;
 }
 
 export class BasicResponseDto {
@@ -23,5 +23,5 @@ export class BasicResponseDto {
     example: 'Operation successful.',
     description: 'Базове повідомлення про успішну операцію',
   })
-  message: string;
+  message!: string;
 }

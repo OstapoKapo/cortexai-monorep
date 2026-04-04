@@ -31,6 +31,7 @@ import {
   UploadTemplateResponseDto,
   UserId,
 } from '@cortex/backend-common';
+import 'multer';
 
 @Controller('templates')
 export class TemplatesController {
@@ -72,9 +73,10 @@ export class TemplatesController {
         .addMaxSizeValidator({ maxSize: 4 * 1024 * 1024 })
         .build({ errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY }),
     )
+    file: Express.Multer.File,
+
     @UserId()
     userId: string,
-    file: Express.Multer.File,
   ): Promise<UploadTemplateResponseDto> {
     const result = await this.templatesService.createTemplate(
       userId,

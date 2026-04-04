@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { TemplatesService } from './templates.service';
 import { S3Service } from '../s3/s3.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateTemplateDto } from 'src/common/dto/reports.dto';
+import { CreateTemplateDto } from '@cortex/backend-common';
 
 const mockS3Service = {
   uploadFile: jest.fn(),

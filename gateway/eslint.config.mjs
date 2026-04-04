@@ -1,9 +1,7 @@
-// @ts-check
-import eslint from '@eslint/js';
+import tseslint from 'typescript-eslint';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 import globals from 'globals';
-import tseslint from 'typescript-eslint';
-
+import eslint from '@eslint/js';
 export default tseslint.config(
   {
     ignores: ['eslint.config.mjs'],
@@ -32,4 +30,13 @@ export default tseslint.config(
       "prettier/prettier": ["error", { endOfLine: "auto" }],
     },
   },
+  // Додаємо override для тестів
+  {
+    files: ['test/**/*.ts'],
+    rules: {
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+    },
+  }
 );

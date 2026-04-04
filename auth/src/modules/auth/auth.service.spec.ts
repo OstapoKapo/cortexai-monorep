@@ -1,13 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AuthService } from '../../src/modules/auth/auth.service';
-import { UsersService } from '../../src/modules/users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { UnauthorizedException } from '@nestjs/common';
 import * as argon2 from 'argon2';
 import { AppErrors } from '@cortex/shared';
+import { UsersService } from '../users/users.service';
+import { AuthService } from './auth.service';
 
-// Мокаємо (імітуємо) зовнішні бібліотеки
 jest.mock('argon2');
 
 describe('AuthService', () => {
@@ -134,10 +133,8 @@ describe('AuthService', () => {
 
   describe('refreshTokens', () => {
     let req: any;
-    let res: any;
     beforeEach(() => {
       req = { cookies: { refreshToken: 'valid.refresh.token' } };
-      res = {};
     });
 
     it('should refresh tokens for valid refreshToken', async () => {
@@ -147,7 +144,7 @@ describe('AuthService', () => {
       // Не мокати приватний метод createTokens напряму, просто перевіряємо результат
       mockUsersService.changeUserData.mockResolvedValue(true);
 
-      const result = await service.refreshTokens(req, res);
+      const result = await service.refreshTokens(req);
       expect(jwtService.verify).toHaveBeenCalled();
       expect(mockUsersService.getUserByEmail).toHaveBeenCalled();
       expect(argon2.verify).toHaveBeenCalled();
@@ -158,25 +155,25 @@ describe('AuthService', () => {
 
     it('should throw if no refreshToken cookie', async () => {
       req.cookies = {};
-      await expect(service.refreshTokens(req, res)).rejects.toThrow(UnauthorizedException);
+      await expect(service.refreshTokens(req)).rejects.toThrow(UnauthorizedException);
     });
 
     it('should throw if jwtService.verify fails', async () => {
       (jwtService.verify as jest.Mock) = jest.fn(() => { throw new Error('bad token'); });
-      await expect(service.refreshTokens(req, res)).rejects.toThrow(UnauthorizedException);
+      await expect(service.refreshTokens(req)).rejects.toThrow(UnauthorizedException);
     });
 
     it('should throw if user not found', async () => {
       (jwtService.verify as jest.Mock) = jest.fn().mockReturnValue({ email: 'test@test.com', sub: '1' });
       mockUsersService.getUserByEmail.mockResolvedValue(null);
-      await expect(service.refreshTokens(req, res)).rejects.toThrow(UnauthorizedException);
+      await expect(service.refreshTokens(req)).rejects.toThrow(UnauthorizedException);
     });
 
     it('should throw if argon2.verify fails', async () => {
       (jwtService.verify as jest.Mock) = jest.fn().mockReturnValue({ email: 'test@test.com', sub: '1' });
       mockUsersService.getUserByEmail.mockResolvedValue({ id: '1', email: 'test@test.com', refreshToken: 'hashed' });
       (argon2.verify as jest.Mock).mockResolvedValue(false);
-      await expect(service.refreshTokens(req, res)).rejects.toThrow(UnauthorizedException);
+      await expect(service.refreshTokens(req)).rejects.toThrow(UnauthorizedException);
     });
   });
 });

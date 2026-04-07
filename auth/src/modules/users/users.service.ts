@@ -67,7 +67,10 @@ export class UsersService {
     try {
       return await this.usersRepository.create(data);
     } catch (err) {
-      if (err instanceof QueryFailedError && (err.driverError as { code: string }).code === '23505') {
+      if (
+        err instanceof QueryFailedError &&
+        (err.driverError as { code: string }).code === '23505'
+      ) {
         throw new ConflictException(AppErrors.AUTH.USER_EXISTS);
       }
       throw new InternalServerErrorException(AppErrors.SYSTEM.INTERNAL_ERROR);

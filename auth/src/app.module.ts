@@ -5,7 +5,7 @@ import {
   SecretKeyGuard,
 } from '@cortex/backend-common';
 import { UsersModule } from './modules/users/users.module';
-import { PrismaModule } from './modules/prisma/prisma.module';
+import { OrmModule } from './modules/orm/orm.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import {
   ThrottlerGuard,
@@ -19,7 +19,7 @@ import { APP_GUARD } from '@nestjs/core';
   imports: [
     AuthModule,
     UsersModule,
-    PrismaModule,
+    OrmModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: process.env.NODE_ENV === 'test' ? '.env.test' : '.env',

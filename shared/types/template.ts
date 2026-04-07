@@ -2,11 +2,11 @@
 export interface Template {
   id: string;
   name: string;
-  description: string | null;
+  description: string;
   fileUrl: string;
   originalFileName: string;
   mimeType: string | null;
-  size: number | null;
+  size: number;
   userId: string;
   createdAt: Date;
   updatedAt: Date;

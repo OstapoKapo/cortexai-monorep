@@ -13,15 +13,15 @@ import {
 } from '@nestjs/throttler';
 import { ThrottlerStorageRedisService } from '@nest-lab/throttler-storage-redis';
 import { APP_GUARD } from '@nestjs/core';
-import { PrismaModule } from './modules/prisma/prisma.module';
+import { OrmModule } from './modules/orm/orm.module';
 import { TemplatesModule } from './modules/templates/templates.module';
 
 @Module({
   imports: [
     ReportsModule,
     S3Module,
-    PrismaModule,
     TemplatesModule,
+    OrmModule,
     ConfigModule.forRoot({ isGlobal: true, envFilePath: `.env` }),
     ThrottlerModule.forRootAsync({
       imports: [ConfigModule],

@@ -7,8 +7,9 @@ import {
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { UsersRepository } from './users.repository';
-import { Prisma, User } from '@prisma/auth-client';
+import { User } from './entities/user.entity';
 import { AppErrors } from '@cortex/shared';
+import { QueryFailedError } from 'typeorm';
 
 @Injectable()
 export class UsersService {
@@ -24,20 +25,15 @@ export class UsersService {
     }
   }
 
-  async changeUserData(
-    id: string,
-    data: Prisma.UserUpdateInput,
-  ): Promise<User> {
+  async changeUserData(id: string, data: Partial<User>): Promise<User> {
     if (data.password) {
       delete data.password;
     }
     try {
       return await this.usersRepository.update(data, id);
     } catch (err) {
-      if (err instanceof Prisma.PrismaClientKnownRequestError) {
-        if (err.code === 'P2025') {
-          throw new NotFoundException(AppErrors.AUTH.USER_NOT_FOUND);
-        }
+      if (err instanceof Error && err.message === 'User not found') {
+        throw new NotFoundException(AppErrors.AUTH.USER_NOT_FOUND);
       }
       throw new InternalServerErrorException(AppErrors.SYSTEM.INTERNAL_ERROR);
     }
@@ -55,17 +51,10 @@ export class UsersService {
     try {
       return await this.usersRepository.findByEmail(email);
     } catch (err: unknown) {
-      if (err instanceof Prisma.PrismaClientInitializationError) {
+      if (err instanceof QueryFailedError) {
         throw new ServiceUnavailableException(
           'Auth database is unavailable. Check Postgres connection.',
         );
-      }
-      if (err instanceof Prisma.PrismaClientKnownRequestError) {
-        if (err.code === 'ECONNREFUSED') {
-          throw new ServiceUnavailableException(
-            'Auth database is unavailable. Check Postgres connection.',
-          );
-        }
       }
       if (err instanceof Error) {
         this.logger.error(`getUserByEmail failed: ${err.message}`, err.stack);
@@ -74,14 +63,12 @@ export class UsersService {
     }
   }
 
-  async createUser(data: Prisma.UserCreateInput): Promise<User> {
+  async createUser(data: Partial<User>): Promise<User> {
     try {
       return await this.usersRepository.create(data);
     } catch (err) {
-      if (err instanceof Prisma.PrismaClientKnownRequestError) {
-        if (err.code === 'P2002') {
-          throw new ConflictException(AppErrors.AUTH.USER_EXISTS);
-        }
+      if (err instanceof QueryFailedError && (err.driverError as { code: string }).code === '23505') {
+        throw new ConflictException(AppErrors.AUTH.USER_EXISTS);
       }
       throw new InternalServerErrorException(AppErrors.SYSTEM.INTERNAL_ERROR);
     }
@@ -91,10 +78,8 @@ export class UsersService {
     try {
       return await this.usersRepository.delete(id);
     } catch (err) {
-      if (err instanceof Prisma.PrismaClientKnownRequestError) {
-        if (err.code === 'P2025') {
-          throw new NotFoundException(AppErrors.AUTH.USER_NOT_FOUND);
-        }
+      if (err instanceof Error && err.message === 'User not found') {
+        throw new NotFoundException(AppErrors.AUTH.USER_NOT_FOUND);
       }
       throw new InternalServerErrorException(AppErrors.SYSTEM.INTERNAL_ERROR);
     }

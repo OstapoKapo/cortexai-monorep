@@ -31,6 +31,24 @@
 $ npm install
 ```
 
+## Database Setup (TypeORM)
+
+### Generate migrations
+```bash
+# Generate new migration based on entity changes
+$ npm run m:gen
+
+# Run all pending migrations
+$ npm run m:run
+
+# Revert last migration
+$ npm run m:rev
+```
+
+### Database Configuration
+Database is configured via `src/db/data-source.ts` and uses environment variables from `.env`:
+- `DATABASE_URL` - PostgreSQL connection string
+
 ## Compile and run the project
 
 ```bash

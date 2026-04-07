@@ -12,7 +12,7 @@ COPY turbo.json ./
 # Copy workspace packages
 COPY shared/ ./shared/
 COPY backend-common/ ./backend-common/
-COPY auth/ ./auth/
+COPY report-service/ ./report-service/
 
 # Install dependencies
 RUN npm install
@@ -21,8 +21,8 @@ RUN npm install
 RUN npm run build --workspace=shared
 RUN npm run build --workspace=backend-common
 
-# Build auth service
-RUN npm run build --workspace=auth
+# Build report service
+RUN npm run build --workspace=report-service
 
 # Production stage
 FROM node:20-alpine AS runner
@@ -41,10 +41,10 @@ COPY --from=builder /app/shared ./shared
 COPY --from=builder /app/backend-common ./backend-common
 
 # Copy built application
-COPY --from=builder /app/auth/dist ./dist
-COPY --from=builder /app/auth/src/db ./src/db
-COPY --from=builder /app/auth/package.json ./package.json
+COPY --from=builder /app/report-service/dist ./dist
+COPY --from=builder /app/report-service/src/db ./src/db
+COPY --from=builder /app/report-service/package.json ./package.json
 
-EXPOSE 3002
+EXPOSE 3003
 
 CMD ["node", "dist/main.js"]

@@ -57,6 +57,25 @@ services:
         condition: service_started
     restart: unless-stopped
 
+  report-service:
+    build:
+      context: .
+      dockerfile: report-service/Dockerfile
+    container_name: cortexai-report-service
+    ports:
+      - "3003:3003"
+    environment:
+      - PORT=3003
+      - DATABASE_URL=postgresql://postgres:admin@db_reports:5432/cortexai-reports-db
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      db_reports:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    restart: unless-stopped
+
   # --- Infrastructure ---
   db:
     image: postgres:15-alpine
@@ -106,6 +125,23 @@ services:
       timeout: 5s
       retries: 5
 
+  db_reports_test:
+    image: postgres:15-alpine
+    container_name: cortexai-reports-test-db
+    ports:
+      - "5435:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: cortexai-reports-test-db
+    volumes:
+      - pgdata-cortexai-reports:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5  
+
   redis:
     image: redis:7-alpine
     container_name: cortexai-redis
@@ -126,11 +162,9 @@ services:
     environment:
       - DEBUG=${DEBUG:-0}
       - SERVICES=s3,sqs
-      - PERSISTENCE=1
     volumes:
-      - localstack-data:/var/lib/localstack
+      - ./localstack/init-scripts/:/etc/localstack/init/ready.d/
 
 volumes:
   pgdata-cortexai-users:
   pgdata-cortexai-reports:
-  localstack-data:

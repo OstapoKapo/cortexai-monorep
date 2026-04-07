@@ -21,12 +21,8 @@ RUN npm install
 RUN npm run build --workspace=shared
 RUN npm run build --workspace=backend-common
 
-# Generate Prisma client for linux
-WORKDIR /app/auth
-RUN npx prisma generate
-
 # Build auth service
-RUN npm run build
+RUN npm run build --workspace=auth
 
 # Production stage
 FROM node:20-alpine AS runner
@@ -46,8 +42,7 @@ COPY --from=builder /app/backend-common ./backend-common
 
 # Copy built application
 COPY --from=builder /app/auth/dist ./dist
-COPY --from=builder /app/auth/prisma ./prisma
-COPY --from=builder /app/auth/prisma.config.ts ./prisma.config.ts
+COPY --from=builder /app/auth/src/db ./src/db
 COPY --from=builder /app/auth/package.json ./package.json
 
 EXPOSE 3002

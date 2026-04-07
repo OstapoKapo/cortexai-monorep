@@ -49,9 +49,6 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Generate Prisma Client
-        run: npx prisma generate --schema=./auth/prisma/schema.prisma
-
       - name: Build Shared Library
         run: npm run build -w @cortex/shared
       
@@ -81,10 +78,7 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Generate Prisma Client
-        run: npx prisma generate --schema=./report-service/prisma/schema.prisma
 
-     
       - name: Build Shared Library
         run: npm run build -w @cortex/shared
       

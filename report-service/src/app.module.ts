@@ -2,7 +2,10 @@ import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ReportsModule } from './modules/reports/reports.module';
 import { S3Module } from './modules/s3/s3.module';
-import { CorrelationIDMiddleware } from '@cortex/backend-common';
+import {
+  CorrelationIDMiddleware,
+  SecretKeyGuard,
+} from '@cortex/backend-common';
 import {
   ThrottlerGuard,
   ThrottlerModule,
@@ -10,15 +13,15 @@ import {
 } from '@nestjs/throttler';
 import { ThrottlerStorageRedisService } from '@nest-lab/throttler-storage-redis';
 import { APP_GUARD } from '@nestjs/core';
-import { PrismaModule } from './modules/prisma/prisma.module';
+import { OrmModule } from './modules/orm/orm.module';
 import { TemplatesModule } from './modules/templates/templates.module';
 
 @Module({
   imports: [
     ReportsModule,
     S3Module,
-    PrismaModule,
     TemplatesModule,
+    OrmModule,
     ConfigModule.forRoot({ isGlobal: true, envFilePath: `.env` }),
     ThrottlerModule.forRootAsync({
       imports: [ConfigModule],
@@ -64,6 +67,10 @@ import { TemplatesModule } from './modules/templates/templates.module';
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: SecretKeyGuard,
     },
   ],
 })

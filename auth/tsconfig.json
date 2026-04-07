@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
-    "moduleResolution": "node",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
     "declaration": true,
     "removeComments": true,
     "emitDecoratorMetadata": true,
@@ -10,8 +10,7 @@
     "target": "ES2023",
     "sourceMap": true,
     "outDir": "./dist",
-    "rootDir": "./src",
-    "baseUrl": "./",
+    "rootDir": ".",
     "incremental": false,
     "skipLibCheck": true,
     "strictNullChecks": true,
@@ -22,8 +21,11 @@
     "paths": {
       "@": ["./src"],
       "@/*": ["./src/*"],
-    }
+      "@cortex/backend-common": ["../../backend-common"],
+      "@cortex/backend-common/*": ["../../backend-common/*"],
+      "@cortex/shared/*": ["../../shared/*"]
+    },
+    "types": ["jest", "node"]
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "test", "**/*spec.ts"]
+  "include": ["src/**/*", "test/**/*", "**/*.spec.ts", "**/*.e2e-spec.ts"]
 }

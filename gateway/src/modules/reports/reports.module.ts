@@ -1,13 +1,14 @@
 import { Module } from '@nestjs/common';
 import { ProxyService } from '../../common/services/proxy.service';
 import { ReportsController } from './reports.controller';
+import { TemplatesController } from './templates.controller';
 import { ConfigModule } from '@nestjs/config';
 import { HttpModule } from '@nestjs/axios';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { AtStrategy } from '../../common/strategies/at.strategy';
 @Module({
-  controllers: [ReportsController],
+  controllers: [ReportsController, TemplatesController],
   imports: [
     ConfigModule,
     HttpModule,

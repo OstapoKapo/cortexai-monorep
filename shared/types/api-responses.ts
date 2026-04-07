@@ -14,23 +14,3 @@ export interface ErrorResponse {
   correlationID?: string; 
 }
 
-export interface AuthResponse {
-  token: string;        
-  userId: string;             
-}
-
-export interface UserProfileResponse {
-    id: string;               
-    name: string;
-    email: string;
-    createdAt: string;        
-    updatedAt: string;        
-}
-
-export type ILoginResponse = BaseResponse<AuthResponse>;
-
-export type IRegisterResponse = BaseResponse<AuthResponse>;
-
-export type IUserProfileResponse = BaseResponse<UserProfileResponse>;
-
-export type ILogoutResponse = BaseResponse<null>;

@@ -12,7 +12,7 @@ import { OrmService } from './orm.service';
         type: 'postgres',
         url: configService.get<string>('DATABASE_URL'),
         autoLoadEntities: true,
-        synchronize: false, 
+        synchronize: false,
         logging: true,
       }),
     }),
